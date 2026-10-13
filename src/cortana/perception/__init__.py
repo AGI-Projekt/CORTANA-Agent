@@ -1,0 +1,1 @@
+"""Perception adapters (implementation pending)."""
