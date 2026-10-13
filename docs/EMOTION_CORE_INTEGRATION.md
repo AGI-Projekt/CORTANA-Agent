@@ -26,7 +26,7 @@ Adapter:
 6. oznacza niską pewność i nieobsługiwane etykiety jako niepewne;
 7. nie kopiuje surowego tekstu do wyniku.
 
-Aktualnie mapowane etykiety to: `neutral`, `joy`, `sadness`, `frustration`, `anger`, `fear`, `anxiety`, `surprise`, `curiosity`, `boredom`, `relief`, `trust` i `gratitude`. Pozostałe etykiety, w tym `mixed`, są mapowane na `unknown` z opisem niejednoznaczności zamiast wymuszonej klasyfikacji.
+Mapowane są wszystkie pojedyncze etykiety z katalogu Emotion Core 1.3: `neutral`, `joy`, `sadness`, `fear`, `anger`, `disgust`, `surprise`, `trust`, `anticipation`, `curiosity`, `frustration`, `anxiety`, `gratitude`, `compassion`, `confusion`, `excitement`, `relief`, `loneliness`, `pride`, `shame`, `guilt`, `nostalgia`, `hope`, `admiration`, `boredom`, `determination`, `overwhelm`, `affection` i `disappointment`. Wynik `mixed` oraz etykiety spoza katalogu są mapowane na `unknown` z opisem niejednoznaczności zamiast wymuszonej klasyfikacji.
 
 Adapter obsługuje wyłącznie `EmotionModality.TEXT`. Pole `transcript` może dostarczyć tekst transkrypcji, ale nie oznacza to przetwarzania surowego audio. Audio, vision i multimodal są jawnie odrzucane, dopóki nie powstanie osobny, zweryfikowany provider.
 
