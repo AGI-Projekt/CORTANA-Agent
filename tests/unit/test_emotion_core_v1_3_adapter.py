@@ -135,3 +135,44 @@ def test_does_not_copy_raw_text_into_estimate():
 
     assert not hasattr(estimate, "text")
     assert all("PRIVATE TEXT" not in ref for ref in estimate.evidence_refs)
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("neutral", EmotionCategory.NEUTRAL),
+        ("joy", EmotionCategory.JOY),
+        ("sadness", EmotionCategory.SADNESS),
+        ("fear", EmotionCategory.FEAR),
+        ("anger", EmotionCategory.ANGER),
+        ("disgust", EmotionCategory.DISGUST),
+        ("surprise", EmotionCategory.SURPRISE),
+        ("trust", EmotionCategory.TRUST),
+        ("anticipation", EmotionCategory.ANTICIPATION),
+        ("curiosity", EmotionCategory.CURIOSITY),
+        ("frustration", EmotionCategory.FRUSTRATION),
+        ("anxiety", EmotionCategory.ANXIETY),
+        ("gratitude", EmotionCategory.GRATITUDE),
+        ("compassion", EmotionCategory.COMPASSION),
+        ("confusion", EmotionCategory.CONFUSION),
+        ("excitement", EmotionCategory.EXCITEMENT),
+        ("relief", EmotionCategory.RELIEF),
+        ("loneliness", EmotionCategory.LONELINESS),
+        ("pride", EmotionCategory.PRIDE),
+        ("shame", EmotionCategory.SHAME),
+        ("guilt", EmotionCategory.GUILT),
+        ("nostalgia", EmotionCategory.NOSTALGIA),
+        ("hope", EmotionCategory.HOPE),
+        ("admiration", EmotionCategory.ADMIRATION),
+        ("boredom", EmotionCategory.BOREDOM),
+        ("determination", EmotionCategory.DETERMINATION),
+        ("overwhelm", EmotionCategory.OVERWHELM),
+        ("affection", EmotionCategory.AFFECTION),
+        ("disappointment", EmotionCategory.DISAPPOINTMENT),
+    ],
+)
+def test_maps_emotion_core_catalog_categories(label, expected):
+    provider, _ = provider_for(make_state(emotion=label))
+    estimate = provider.analyze(make_request())
+
+    assert estimate.category is expected
