@@ -39,6 +39,22 @@ class EmotionCategory(StrEnum):
     RELIEF = "relief"
     TRUST = "trust"
     GRATITUDE = "gratitude"
+    DISGUST = "disgust"
+    ANTICIPATION = "anticipation"
+    COMPASSION = "compassion"
+    CONFUSION = "confusion"
+    EXCITEMENT = "excitement"
+    LONELINESS = "loneliness"
+    PRIDE = "pride"
+    SHAME = "shame"
+    GUILT = "guilt"
+    NOSTALGIA = "nostalgia"
+    HOPE = "hope"
+    ADMIRATION = "admiration"
+    DETERMINATION = "determination"
+    OVERWHELM = "overwhelm"
+    AFFECTION = "affection"
+    DISAPPOINTMENT = "disappointment"
 
 
 @dataclass(frozen=True, slots=True)
