@@ -30,6 +30,22 @@ _CATEGORY_MAP: dict[str, EmotionCategory] = {
     "relief": EmotionCategory.RELIEF,
     "trust": EmotionCategory.TRUST,
     "gratitude": EmotionCategory.GRATITUDE,
+    "disgust": EmotionCategory.DISGUST,
+    "anticipation": EmotionCategory.ANTICIPATION,
+    "compassion": EmotionCategory.COMPASSION,
+    "confusion": EmotionCategory.CONFUSION,
+    "excitement": EmotionCategory.EXCITEMENT,
+    "loneliness": EmotionCategory.LONELINESS,
+    "pride": EmotionCategory.PRIDE,
+    "shame": EmotionCategory.SHAME,
+    "guilt": EmotionCategory.GUILT,
+    "nostalgia": EmotionCategory.NOSTALGIA,
+    "hope": EmotionCategory.HOPE,
+    "admiration": EmotionCategory.ADMIRATION,
+    "determination": EmotionCategory.DETERMINATION,
+    "overwhelm": EmotionCategory.OVERWHELM,
+    "affection": EmotionCategory.AFFECTION,
+    "disappointment": EmotionCategory.DISAPPOINTMENT,
 }
 
 
