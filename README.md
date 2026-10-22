@@ -3,40 +3,40 @@
 **Project:** Lilith Cortana Nebiru  
 **Target platforms:** Windows first, Linux supported for development and runtime.
 
-CORTANA-Agent is the central repository for a modular, cross-platform conversational agent. The current branch establishes the project scaffold; it does not imply that planned capabilities are already implemented.
+CORTANA-Agent is a modular, cross-platform conversational agent foundation. This repository now includes an initial deterministic agent core, bounded volatile conversation memory, an allowlisted tool registry, and a controlled self-improvement proposal store. It is an early-stage scaffold, not a complete AGI, hologram, or autonomous deployment system.
 
-## Current status
-- Repository foundation and package layout are being prepared.
-- The shared core is intended to remain independent from platform-specific interfaces.
-- Emotion Core will integrate through an adapter after its existing archives are inventoried and regression-tested.
-- Perception, memory, planning, speech, vision, desktop UI, and Unreal Engine integrations are roadmap items, not current implementation claims.
+## Implemented starter components
+- **Core:** request/response contracts and provider protocol with an offline echo implementation.
+- **Memory:** bounded in-process history with configurable age retention and explicit clearing. It is not persisted to disk.
+- **Tools:** explicit allowlist, required-argument validation, and no implicit shell access.
+- **Self-improvement:** structured JSON proposals, acceptance criteria, and a human-reviewed workflow. Proposal data is never executed.
+- **CI:** existing Windows/Linux GitHub Actions test matrix.
 
-## Principles
-- Modular boundaries and explicit interfaces.
-- Least-privilege tool execution.
-- Tests and review for behavior-changing code.
-- No secrets or private sensor data in source control.
-- Self-modification, when introduced, must run in an isolated branch or sandbox with tests, review, and rollback.
+Emotion Core integration remains behind its adapter contract; see `docs/EMOTION_CORE_INTEGRATION.md`. Speech, vision, long-term memory, desktop UI, and holographic/Unreal presentation remain future work.
 
-## Repository map
-- `src/cortana/`: Python package and planned component boundaries.
-- `tests/`: unit, integration, security, and regression test locations.
-- `docs/ARCHITECTURE.md`: system boundaries.
-- `docs/SECURITY.md`: security baseline.
-- `docs/CONTRIBUTING.md`: contribution workflow.
-- `docs/ROADMAP.md`: proposed implementation sequence.
-
-## Development
+## Quick start
 Requires Python 3.12 or newer.
 
 ```bash
 python -m venv .venv
-# Linux
+# Linux/macOS
 source .venv/bin/activate
-# Windows PowerShell:
-# .venv\\Scripts\\Activate.ps1
+# Windows PowerShell: .venv\\Scripts\\Activate.ps1
 python -m pip install -e ".[test]"
 python -m pytest -q
 ```
 
-See `.env.example` for local configuration placeholders. Do not add real secrets to Git.
+Minimal usage:
+
+```python
+from cortana.core import AgentRequest, CortanaAgent
+agent = CortanaAgent()
+response = agent.respond(AgentRequest("Cześć, Cortano!"))
+print(response.text)
+```
+
+## Configuration and security
+See `.env.example`, `docs/SECURITY.md`, and `docs/SELF_IMPROVEMENT.md`. Never commit credentials or personal sensor data. Do not give the agent broad repository, operating-system, or secret-management privileges.
+
+## Project status
+This repository contains an executable foundation. Roadmap items are not claims of completed functionality. See `docs/ROADMAP.md`.
