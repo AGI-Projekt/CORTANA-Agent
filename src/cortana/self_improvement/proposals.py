@@ -32,7 +32,7 @@ class ProposalStore:
         destination = (self.root / f"{safe_id}.json").resolve()
         if destination.parent != self.root: raise ValueError("proposal path escaped proposal directory")
         temporary = destination.with_suffix(".json.tmp")
-        temporary.write_text(json.dumps(asdict(proposal), indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+        temporary.write_text(json.dumps(asdict(proposal), indent=2, ensure_ascii=False) + chr(10), encoding="utf-8")
         temporary.replace(destination)
         return destination
     def list(self) -> tuple[dict[str, object], ...]:
