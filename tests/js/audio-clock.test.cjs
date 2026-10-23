@@ -66,7 +66,7 @@ test("scheduleTimeline requires captured anchor and calls scheduler at that time
   assert.throws(() => h.clock.scheduleTimeline(scheduler, []), /No audio playout anchor/);
   assert.throws(() => h.clock.scheduleTimeline({}, []), /viseme scheduler/);
   h.clock.markOutputStart(h.context);
-  const result = h.clock.scheduleTimeline([{ viseme: "open" }], scheduler);
+  const result = h.clock.scheduleTimeline(scheduler, [{ viseme: "open" }]);
   assert.equal(result.scheduled, 1);
   assert.equal(result.anchorTimeMs, 1500);
 });
