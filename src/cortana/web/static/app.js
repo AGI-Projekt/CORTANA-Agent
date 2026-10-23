@@ -14,9 +14,16 @@
   let sessionId = newSession(), recorder = null, mediaStream = null, recordedChunks = [];
   let autoStopTimer = null, busy = false, recording = false, voiceCounter = 0;
   const labels = { idle:"READY", listening:"LISTENING", thinking:"PROCESSING", speaking:"SPEAKING" };
+  const toneLabels = { neutral:"NEUTRAL", supportive:"SUPPORTIVE", exploratory:"EXPLORATORY", upbeat:"UPBEAT" };
   function setAvatarState(state) {
     el.avatar.dataset.state = state;
     el.avatarState.textContent = labels[state] || "READY";
+  }
+  function setAvatarTone(tone) {
+    const safeTone = Object.prototype.hasOwnProperty.call(toneLabels, tone) ? tone : "neutral";
+    el.avatar.dataset.tone = safeTone;
+    const label = byId("avatar-tone");
+    if (label) label.textContent = toneLabels[safeTone];
   }
   function setWorking(text, isBusy) {
     el.workingText.textContent = text;
@@ -102,6 +109,7 @@
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.detail || "Nie udało się uzyskać odpowiedzi.");
       addMessage("assistant", payload.text || "Nie otrzymałam tekstowej odpowiedzi.");
+      setAvatarTone(payload.metadata && payload.metadata.response_style);
       el.latency.textContent = Math.round(performance.now() - started) + " MS";
       el.connection.textContent = "SYSTEM ONLINE";
       setWorking("Odpowiedź gotowa", false);
@@ -254,6 +262,7 @@
     el.latency.textContent = "WAITING";
     setWorking("Czekam na wiadomość", false);
     setAvatarState("idle");
+    setAvatarTone("neutral");
     showError("");
   });
   if (!("speechSynthesis" in window)) {

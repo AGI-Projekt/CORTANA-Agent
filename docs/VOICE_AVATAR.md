@@ -35,3 +35,8 @@ For an offline text-only UI set CORTANA_OFFLINE=1. Transcription still needs cre
 ## Security and release requirements
 
 Before non-local deployment, add authentication, rate limiting, HTTPS, deployment configuration, safe logging, quotas, and a reviewed retention policy. The default server binds to loopback. Browser microphone capture usually requires localhost or a secure context such as HTTPS.
+
+
+## Response-style visualization
+
+The avatar can display one of four coarse presentation cues: neutral, supportive, exploratory, or upbeat. The API emits a non-neutral cue only when the core explicitly marks tone adjustment as allowed. The cue describes response presentation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, or disabled estimates fall back to neutral. The cue is local UI state and is not stored as a persistent user profile.

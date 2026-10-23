@@ -24,6 +24,7 @@ Status is updated only when implementation and tests have been verified.
 - [x] Manual microphone permission, recording control, and upload limits.
 - [x] Browser-native speech synthesis with synthetic-voice disclosure.
 - [x] Mock-backed tests for audio and web routes; Windows/Linux CI.
+- [x] Coarse emotion-guided avatar presentation cues with neutral fallback and tests.
 - [ ] Validate live transcription and a live model response with a maintainer-managed key.
 - [ ] Replace the SVG stand-in with a designed and rigged 3D avatar.
 - [ ] Add a full-duplex Realtime API/WebRTC path with ephemeral session credentials.

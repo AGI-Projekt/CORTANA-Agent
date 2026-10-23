@@ -24,6 +24,20 @@ class ClearSessionPayload(BaseModel):
 class Transcriber(Protocol):
     def transcribe(self, filename: str, audio_bytes: bytes, content_type: str | None = None) -> str: ...
 
+def _response_style(metadata: dict[str, object]) -> str:
+    """Return a coarse presentation hint, never a claim about the user's inner state."""
+    if not metadata.get("tone_adjusted"):
+        return "neutral"
+    category = metadata.get("emotion_category")
+    if category in {"sadness", "anxiety", "fear", "overwhelm", "frustration", "anger"}:
+        return "supportive"
+    if category in {"confusion", "curiosity", "interest"}:
+        return "exploratory"
+    if category in {"joy", "excitement", "gratitude"}:
+        return "upbeat"
+    return "neutral"
+
+
 def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None = None) -> FastAPI:
     """Create an app with injectable dependencies for tests; never bind publicly by default."""
     app = FastAPI(title="Cortana Voice Prototype", version="0.3.0",
@@ -92,6 +106,7 @@ def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None =
             "metadata": {
                 "emotion_status": answer.metadata.get("emotion_status", "disabled"),
                 "tone_adjusted": bool(answer.metadata.get("tone_adjusted", False)),
+                "response_style": _response_style(answer.metadata),
             },
         }
 
