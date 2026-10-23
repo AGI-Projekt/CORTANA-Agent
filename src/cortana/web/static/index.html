@@ -53,7 +53,7 @@
     <div><small>RESPONSE</small><strong id="latency-label">WAITING</strong></div>
     <div><small>MEMORY</small><strong>SESSION ONLY</strong></div>
   </div>
-  <p class="disclosure">Tryb na żywo przesyła dźwięk do modelu głosowego przez WebRTC; mikrofon uruchamia się wyłącznie po kliknięciu i zgodzie. Głos AI jest syntetyczny.</p>
+  <p class="disclosure">Tryb na żywo przesyła dźwięk do modelu głosowego przez WebRTC; mikrofon uruchamia się wyłącznie po kliknięciu i zgodzie. Głos AI jest syntetyczny. Opcjonalne dopasowanie stylu wysyła końcową transkrypcję do skonfigurowanego modułu Emotion Core; domyślnie jest wyłączone.</p>
 </section>
 <section class="conversation-panel panel" aria-label="Rozmowa z Cortaną">
   <div class="panel-kicker"><span>02 / CONVERSATION</span><span id="session-label">SESSION ACTIVE</span></div>
@@ -76,7 +76,9 @@
     <span id="mic-support" class="footnote">Mikrofon: wymaga zgody</span>
     <label class="live-voice-label" for="realtime-voice-select">GŁOS <select id="realtime-voice-select" class="voice-select"><option value="marin" selected>Marin</option><option value="cedar">Cedar</option><option value="alloy">Alloy</option><option value="ash">Ash</option><option value="ballad">Ballad</option><option value="coral">Coral</option><option value="echo">Echo</option><option value="sage">Sage</option><option value="shimmer">Shimmer</option><option value="verse">Verse</option></select></label>
     <button id="realtime-button" class="realtime-button" type="button" aria-pressed="false">Połącz głos na żywo</button>
-    <span id="realtime-caption" class="footnote">REALTIME: OFF</span><span class="footnote">AI VOICE · SERVER KEY</span>
+    <span id="realtime-caption" class="footnote">REALTIME: OFF</span>
+    <label class="toggle-label emotion-opt-in" for="realtime-emotion-opt-in"><input id="realtime-emotion-opt-in" type="checkbox"><span class="toggle"></span><span>Dopasuj styl (opcjonalnie)</span></label>
+    <span id="realtime-emotion-status" class="footnote">EMOTION HINTS: OFF</span><span class="footnote">AI VOICE · SERVER KEY</span>
     <audio id="realtime-audio" autoplay playsinline></audio>
   </div>
   <div id="error-banner" class="error-banner" role="alert" hidden></div>

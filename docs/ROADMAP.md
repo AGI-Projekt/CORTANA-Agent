@@ -31,7 +31,9 @@ Status is updated only when implementation and tests have been verified.
 - [x] Add a per-session voice chooser, Polish transcription configuration, and explicit connect/disconnect.
 - [ ] Replace procedural geometry with a designed, rigged 3D avatar and proper viseme lip sync.
 - [ ] Add production authentication, rate limiting, and deployment hardening.
-- [ ] Add moderation/observability for the Realtime path and bring voice turns through the Emotion Core policy where appropriate.
+- [x] Add opt-in Realtime transcript-to-Emotion Core guidance with neutral fallback and privacy-limited audit records.
+- [ ] Validate opt-in behavior against a locally installed Emotion Core package and live Realtime key.
+- [ ] Add production authentication, rate limiting, moderation and deployment hardening.
 
 ## Phase 3 — multimodal and presentation
 - [ ] Vision adapter with consent and explicit camera activation.
