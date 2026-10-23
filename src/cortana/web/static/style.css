@@ -52,3 +52,6 @@
 #avatar[data-tone="neutral"]{filter:drop-shadow(0 0 24px rgba(73,219,255,.34))}
 
 .emotion-opt-in{flex:1 1 auto}.emotion-opt-in span:last-child{max-width:190px}
+
+/* Live audio analyser drives mouth scale directly; avoid competing with the demo keyframe. */
+#avatar[data-live-audio="true"][data-state="speaking"] #mouth{animation:none}

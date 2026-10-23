@@ -55,3 +55,19 @@ def test_response_style_is_coarse_and_defaults_to_neutral():
     assert _response_style({"tone_adjusted": True, "emotion_category": "curiosity"}) == "exploratory"
     assert _response_style({"tone_adjusted": True, "emotion_category": "joy"}) == "upbeat"
     assert _response_style({"tone_adjusted": True, "emotion_category": "unknown"}) == "neutral"
+
+
+def test_avatar_assets_include_live_audio_lipsync_and_blink_hooks():
+    from pathlib import Path
+    import cortana.web.app as app_module
+
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    app_script = (static_dir / "app.js").read_text(encoding="utf-8")
+    avatar_script = (static_dir / "avatar3d.js").read_text(encoding="utf-8")
+
+    assert "startRemoteAudioAnalysis" in app_script
+    assert "getByteTimeDomainData" in app_script
+    assert "dataset.liveAudio" in app_script
+    assert "nextBlinkAt" in avatar_script
+    assert "eyeLeft.scale.y" in avatar_script
+    assert "dataset.mouthOpen" in avatar_script
