@@ -71,3 +71,21 @@ def test_avatar_assets_include_live_audio_lipsync_and_blink_hooks():
     assert "nextBlinkAt" in avatar_script
     assert "eyeLeft.scale.y" in avatar_script
     assert "dataset.mouthOpen" in avatar_script
+
+
+def test_viseme_scheduler_is_loaded_before_chat_and_maps_common_polish_shapes():
+    from pathlib import Path
+    import cortana.web.app as app_module
+
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    page = (static_dir / "index.html").read_text(encoding="utf-8")
+    scheduler = (static_dir / "visemes.js").read_text(encoding="utf-8")
+    app_script = (static_dir / "app.js").read_text(encoding="utf-8")
+    avatar_script = (static_dir / "avatar3d.js").read_text(encoding="utf-8")
+
+    assert page.index("/static/visemes.js") < page.index("/static/app.js")
+    assert 'ą:"open"' in scheduler and 'ę:"mid"' in scheduler
+    assert 'o:"round"' in scheduler and 'm:"closed"' in scheduler
+    assert "CortanaVisemeScheduler.enqueue" in app_script
+    assert 'cortana:viseme' in avatar_script
+    assert "visemeProfiles" in avatar_script

@@ -255,6 +255,7 @@
         void updateRealtimeEmotion(transcript);
       }
     } else if (event.type === "response.created") {
+      if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.reset();
       setAvatarState("thinking");
       setWorking("Cortana odpowiada…", true);
       liveAssistantP = null;
@@ -266,6 +267,7 @@
       event.type === "response.audio_transcript.delta"
     ) {
       appendLiveTranscript("assistant", event.delta || "");
+      if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.enqueue(event.delta || "");
     } else if (
       event.type === "response.output_audio_transcript.done" ||
       event.type === "response.audio_transcript.done"
@@ -292,6 +294,7 @@
   }
   function cleanupRealtime() {
     stopRemoteAudioAnalysis();
+    if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.reset();
     realtimeActive = false;
     realtimeConnecting = false;
     liveAssistantP = null;
