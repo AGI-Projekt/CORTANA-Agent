@@ -68,3 +68,8 @@ Never commit API keys or put them in the browser. The live voice endpoint return
 - Structured self-improvement proposals requiring review and tests.
 
 See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, and docs/SELF_IMPROVEMENT.md.
+
+
+## Viseme timing API
+
+The browser includes an experimental timestamp-based viseme timeline API for future audio-aligned sources. The current transcript-driven path remains approximate; the project does not yet claim phoneme-accurate lip sync. The CI pipeline runs deterministic Node.js tests for timeline timing, validation, cancellation, and reset behavior.

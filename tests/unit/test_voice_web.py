@@ -89,3 +89,16 @@ def test_viseme_scheduler_is_loaded_before_chat_and_maps_common_polish_shapes():
     assert "CortanaVisemeScheduler.enqueue" in app_script
     assert 'cortana:viseme' in avatar_script
     assert "visemeProfiles" in avatar_script
+
+
+def test_viseme_scheduler_exposes_bounded_timestamped_timeline_contract():
+    from pathlib import Path
+    import cortana.web.app as app_module
+
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    scheduler = (static_dir / "visemes.js").read_text(encoding="utf-8")
+
+    assert "playTimeline" in scheduler
+    assert "MAX_TIMELINE_EVENTS = 512" in scheduler
+    assert "MAX_OFFSET_MS = 120000" in scheduler
+    assert 'source: source || "text"' in scheduler
