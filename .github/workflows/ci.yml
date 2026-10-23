@@ -35,3 +35,5 @@ jobs:
         run: python -m pytest -q
       - name: Run browser scheduler tests
         run: node --test tests/js/visemes.test.cjs
+      - name: Run browser audio-clock tests
+        run: node --test tests/js/audio-clock.test.cjs

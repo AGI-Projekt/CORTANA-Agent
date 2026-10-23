@@ -32,6 +32,7 @@ Status is updated only when implementation and tests have been verified.
 - [x] Drive procedural 3D/SVG mouth opening from live output-audio energy and add procedural blinking.
 - [x] Add a coarse grapheme-to-viseme scheduler and smoothed mouth-profile transitions in 3D/2D.
 - [x] Add a bounded timestamped viseme timeline API with deterministic Node.js tests.
+- [x] Add a Web Audio playout-clock bridge and first-audible-frame anchor for the viseme timeline.
 - [ ] Connect the timeline API to a provider that emits true audio-aligned phoneme/viseme timestamps.
 - [ ] Replace procedural geometry with a designed, rigged 3D avatar and audio-aligned, phoneme-accurate viseme lip sync.
 - [ ] Add production authentication, rate limiting, and deployment hardening.

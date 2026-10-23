@@ -73,3 +73,8 @@ See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md
 ## Viseme timing API
 
 The browser includes an experimental timestamp-based viseme timeline API for future audio-aligned sources. The current transcript-driven path remains approximate; the project does not yet claim phoneme-accurate lip sync. The CI pipeline runs deterministic Node.js tests for timeline timing, validation, cancellation, and reset behavior.
+
+
+## Audio-synchronized viseme clock
+
+audio-clock.js bridges AudioContext.getOutputTimestamp() with the monotonic clock used by the viseme timeline and falls back explicitly when unsupported. It exposes the playout anchor for a future source of audio-aligned viseme timestamps. The current Realtime transcript-driven mouth shapes remain approximate; no phoneme alignment is inferred from transcript timing alone.
