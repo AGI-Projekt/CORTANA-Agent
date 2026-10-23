@@ -9,37 +9,37 @@ Status is updated only when implementation and tests have been verified.
 - [x] Deterministic agent core, bounded volatile memory, and allowlisted tool registry.
 - [x] Structured self-improvement proposals with review-and-rollback procedure.
 
-## Phase 1 — interfaces and tests
+## Phase 1 — conversational core
 - [x] Core request/response contracts.
 - [x] Tool permission and argument-validation contract.
-- [x] Memory with explicit limits, retention, and clearing.
-- [x] LLM provider protocol and deterministic adapter tests.
-- [x] Session-scoped, volatile conversation history.
+- [x] Bounded session history with explicit clearing.
+- [x] Optional OpenAI Responses API text adapter.
 - [x] Emotion provider injection with confidence-gated tone adaptation and neutral fallback.
-- [ ] Formal API schemas and structured audit events.
-- [ ] Observability, metrics, and replayable evaluations.
-
-## Phase 2 — Emotion Core integration
-- [x] Preserve existing Emotion Core source and contract tests.
-- [x] Adapter for the existing Emotion Core 1.3 contract.
-- [x] Hook EmotionProvider into conversation core without granting permissions.
-- [ ] Validate against the original Emotion Core archive on a local system.
-- [ ] Confirm archive redistribution/license and define versioned release method.
-- [ ] Define versioned schemas for temporal and multimodal extensions.
-
-## Phase 3 — capabilities
-- [x] OpenAI Responses API provider adapter (requires optional SDK and runtime credentials).
 - [x] Interactive terminal runtime and offline demo.
-- [ ] Verify a live API call using a maintainer-provided key; CI uses mocks and needs no secrets.
-- [ ] Optional speech and vision adapters with visible sensor controls.
-- [ ] Bounded planning and approval-gated tool execution.
-- [ ] Persistent memory after retention/deletion controls and security review.
 
-## Phase 4 — interfaces and extensions
-- [ ] Windows desktop interface.
-- [ ] Linux development/runtime support beyond the core.
-- [ ] Optional web UI and Unreal Engine presentation.
+## Phase 2 — voice and avatar prototype
+- [x] Optional speech transcription adapter using gpt-transcribe.
+- [x] Local FastAPI endpoints for chat, session clearing, and transcription.
+- [x] Browser UI with a procedural SVG avatar and state animations.
+- [x] Manual microphone permission, recording control, and upload limits.
+- [x] Browser-native speech synthesis with synthetic-voice disclosure.
+- [x] Mock-backed tests for audio and web routes; Windows/Linux CI.
+- [ ] Validate live transcription and a live model response with a maintainer-managed key.
+- [ ] Replace the SVG stand-in with a designed and rigged 3D avatar.
+- [ ] Add a full-duplex Realtime API/WebRTC path with ephemeral session credentials.
+- [ ] Add production authentication, rate limiting, and deployment hardening.
+
+## Phase 3 — multimodal and presentation
+- [ ] Vision adapter with consent and explicit camera activation.
+- [ ] Temporal Emotion Core integration after archive and licensing review.
+- [ ] Native desktop shell or Unreal Engine presentation.
+- [ ] Lip-sync from speech timing/visemes for a rigged avatar.
+
+## Phase 4 — controlled improvement
+- [x] Structured proposals and human-reviewed improvement workflow.
+- [ ] Isolated PR generation with scoped credentials and required checks.
+- [ ] Replayable task evaluations, metrics, and rollback drills.
 
 ## Release criteria
 
-A phase is complete only when its acceptance criteria, tests, and security checks pass. Self-improvement must preserve isolation, review, CI, and rollback.
+A phase is complete only when tests, security checks, and acceptance criteria pass. This voice/avatar stage is a local prototype, not a production deployment.
