@@ -16,6 +16,9 @@ def test_web_health_chat_and_ui_assets():
     assert page.status_code == 200
     assert "CORTANA" in page.text
     assert client.get("/static/app.js").status_code == 200
+    assert client.get("/static/avatar3d.js").status_code == 200
+    assert "realtime-button" in page.text
+    assert "realtime-voice-select" in page.text
     answer = client.post("/api/chat", json={"text":"Cześć","session_id":"test-session"})
     assert answer.status_code == 200
     assert answer.json()["text"] == "Rozumiem: Cześć"

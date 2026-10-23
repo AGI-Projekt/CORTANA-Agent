@@ -11,6 +11,7 @@ from cortana.audio import OpenAIAudioProvider
 from cortana.audio.openai_audio import MAX_AUDIO_BYTES, SUPPORTED_AUDIO_SUFFIXES
 from cortana.core import AgentRequest, CortanaAgent, EchoModel
 from cortana.llm import OpenAIResponsesModel
+from cortana.voice import RealtimeSessionProvider
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -21,15 +22,19 @@ class ChatPayload(BaseModel):
 class ClearSessionPayload(BaseModel):
     session_id: str = Field(min_length=1, max_length=128)
 
+class RealtimeSessionPayload(BaseModel):
+    voice: str | None = Field(default=None, min_length=1, max_length=32)
+
 class Transcriber(Protocol):
     def transcribe(self, filename: str, audio_bytes: bytes, content_type: str | None = None) -> str: ...
 
-def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None = None) -> FastAPI:
+def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None = None, realtime_provider: Any | None = None) -> FastAPI:
     """Create an app with injectable dependencies for tests; never bind publicly by default."""
     app = FastAPI(title="Cortana Voice Prototype", version="0.3.0",
                   docs_url=None, redoc_url=None, openapi_url=None)
     runtime_agent = agent
     runtime_audio = audio_provider
+    runtime_realtime = realtime_provider
 
     def get_agent() -> Any:
         nonlocal runtime_agent
@@ -55,6 +60,18 @@ def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None =
                     detail="Transcription is not configured. Install the llm extra and set OPENAI_API_KEY.",
                 ) from exc
         return runtime_audio
+
+    def get_realtime_provider() -> Any:
+        nonlocal runtime_realtime
+        if runtime_realtime is None:
+            try:
+                runtime_realtime = RealtimeSessionProvider()
+            except (ImportError, RuntimeError, ValueError) as exc:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Realtime voice is not configured. Install the llm extra and set OPENAI_API_KEY.",
+                ) from exc
+        return runtime_realtime
 
     @app.middleware("http")
     async def security_headers(request, call_next):
@@ -128,4 +145,24 @@ def create_app(*, agent: Any | None = None, audio_provider: Transcriber | None =
         if not transcript.strip():
             raise HTTPException(status_code=502, detail="Audio transcription returned no text")
         return {"text": transcript}
+    @app.post("/api/realtime/session")
+    async def create_realtime_session(payload: RealtimeSessionPayload):
+        try:
+            session = get_realtime_provider().create_client_secret(voice=payload.voice)
+        except HTTPException:
+            raise
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(
+                status_code=502,
+                detail="Could not create a Realtime voice session. Check server configuration and provider access.",
+            ) from exc
+        return {
+            "value": session["value"],
+            "expires_at": session.get("expires_at"),
+            "model": session["model"],
+            "voice": session["voice"],
+        }
+
     return app
