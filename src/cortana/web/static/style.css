@@ -50,3 +50,5 @@
 #avatar[data-tone="exploratory"]{filter:drop-shadow(0 0 31px rgba(136,158,255,.52))}
 #avatar[data-tone="upbeat"]{filter:drop-shadow(0 0 34px rgba(117,255,213,.55))}
 #avatar[data-tone="neutral"]{filter:drop-shadow(0 0 24px rgba(73,219,255,.34))}
+
+.emotion-opt-in{flex:1 1 auto}.emotion-opt-in span:last-child{max-width:190px}

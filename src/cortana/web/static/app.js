@@ -8,7 +8,8 @@
     working: byId("working-state"), workingText: byId("working-text"), error: byId("error-banner"),
     latency: byId("latency-label"), micSupport: byId("mic-support"), connection: byId("connection-label"),
     realtimeButton: byId("realtime-button"), realtimeVoice: byId("realtime-voice-select"),
-    realtimeCaption: byId("realtime-caption"), realtimeAudio: byId("realtime-audio")
+    realtimeCaption: byId("realtime-caption"), realtimeAudio: byId("realtime-audio"),
+    realtimeEmotionOptIn: byId("realtime-emotion-opt-in"), realtimeEmotionStatus: byId("realtime-emotion-status")
   };
   const newSession = () => (window.crypto && typeof window.crypto.randomUUID === "function")
     ? window.crypto.randomUUID()
@@ -122,6 +123,61 @@
     liveAssistantP.textContent = liveAssistantText;
     el.chatLog.scrollTop = el.chatLog.scrollHeight;
   }
+  async function updateRealtimeEmotion(transcript) {
+    if (!el.realtimeEmotionOptIn || !el.realtimeEmotionOptIn.checked || !transcript.trim()) return;
+    if (el.realtimeEmotionStatus) el.realtimeEmotionStatus.textContent = "EMOTION HINTS: ANALYZING";
+    try {
+      const response = await fetch("/api/realtime/turn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: true, transcript: transcript })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error("Emotion hint unavailable");
+      setAvatarTone(payload.response_style || "neutral");
+      if (el.realtimeEmotionStatus) {
+        const states = {
+          adjusted: "EMOTION HINTS: ACTIVE",
+          neutral: "EMOTION HINTS: NEUTRAL",
+          disabled: "EMOTION HINTS: OFF",
+          unavailable: "EMOTION HINTS: UNAVAILABLE",
+          invalid_response: "EMOTION HINTS: NEUTRAL"
+        };
+        el.realtimeEmotionStatus.textContent = states[payload.status] || "EMOTION HINTS: NEUTRAL";
+      }
+      // The update guides subsequent Realtime responses; the current response may already be underway.
+      if (payload.instructions && realtimeChannel && realtimeChannel.readyState === "open") {
+        realtimeChannel.send(JSON.stringify({
+          type: "session.update",
+          session: { type: "realtime", instructions: payload.instructions }
+        }));
+      }
+    } catch (_) {
+      setAvatarTone("neutral");
+      if (el.realtimeEmotionStatus) el.realtimeEmotionStatus.textContent = "EMOTION HINTS: UNAVAILABLE";
+    }
+  }
+
+  async function resetRealtimeEmotion() {
+    setAvatarTone("neutral");
+    if (el.realtimeEmotionStatus) el.realtimeEmotionStatus.textContent = "EMOTION HINTS: OFF";
+    if (!realtimeChannel || realtimeChannel.readyState !== "open") return;
+    try {
+      const response = await fetch("/api/realtime/turn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: false })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.ok && payload.instructions && realtimeChannel && realtimeChannel.readyState === "open") {
+        realtimeChannel.send(JSON.stringify({
+          type: "session.update",
+          session: { type: "realtime", instructions: payload.instructions }
+        }));
+      }
+    } catch (_) {}
+  }
+
   function handleRealtimeEvent(event) {
     if (!event || typeof event.type !== "string") return;
     if (event.type === "input_audio_buffer.speech_started") {
@@ -131,7 +187,11 @@
       setAvatarState("thinking");
       setWorking("Cortana przygotowuje odpowiedź…", true);
     } else if (event.type === "conversation.item.input_audio_transcription.completed") {
-      appendLiveTranscript("user", event.transcript || "");
+      const transcript = typeof event.transcript === "string" ? event.transcript.trim() : "";
+      appendLiveTranscript("user", transcript);
+      if (transcript && el.realtimeEmotionOptIn && el.realtimeEmotionOptIn.checked) {
+        void updateRealtimeEmotion(transcript);
+      }
     } else if (event.type === "response.created") {
       setAvatarState("thinking");
       setWorking("Cortana odpowiada…", true);
@@ -442,6 +502,20 @@
       el.form.requestSubmit();
     }
   });
+  if (el.realtimeEmotionOptIn) {
+    el.realtimeEmotionOptIn.addEventListener("change", () => {
+      if (el.realtimeEmotionOptIn.checked) {
+        if (el.realtimeEmotionStatus) {
+          el.realtimeEmotionStatus.textContent = realtimeActive
+            ? "EMOTION HINTS: WAITING FOR TRANSCRIPT"
+            : "EMOTION HINTS: ON AFTER CONNECT";
+        }
+      } else {
+        void resetRealtimeEmotion();
+      }
+    });
+  }
+
   el.mic.addEventListener("click", () => {
     if (busy) return;
     if (recording) stopRecording();
