@@ -41,3 +41,14 @@ def test_clear_session_endpoint():
     response = client.post("/api/session/clear", json={"session_id":"session-a"})
     assert response.status_code == 200
     assert response.json()["status"] == "cleared"
+
+
+def test_response_style_is_coarse_and_defaults_to_neutral():
+    from cortana.web.app import _response_style
+
+    assert _response_style({"emotion_status": "disabled"}) == "neutral"
+    assert _response_style({"tone_adjusted": False, "emotion_category": "sadness"}) == "neutral"
+    assert _response_style({"tone_adjusted": True, "emotion_category": "anxiety"}) == "supportive"
+    assert _response_style({"tone_adjusted": True, "emotion_category": "curiosity"}) == "exploratory"
+    assert _response_style({"tone_adjusted": True, "emotion_category": "joy"}) == "upbeat"
+    assert _response_style({"tone_adjusted": True, "emotion_category": "unknown"}) == "neutral"

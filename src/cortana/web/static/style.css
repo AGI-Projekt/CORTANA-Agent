@@ -27,3 +27,10 @@
 @media(max-width:900px){.layout{grid-template-columns:1fr;max-width:720px;margin-top:20px}.avatar-stage{min-height:350px}.avatar{width:min(70%,285px)}.conversation-panel{min-height:600px}.chat-log{max-height:390px}.footer{flex-wrap:wrap}.footer span:last-child{display:none}}
 @media(max-width:500px){.topbar{height:65px;padding:0 17px}.layout{padding:0 11px;gap:13px}.panel{border-radius:14px}.panel-kicker{padding:16px 16px 0;font-size:8px}.avatar-stage{min-height:320px}.orbit-b{width:310px;height:310px}.orbit-a{width:270px;height:270px}.signal-row>div{padding:13px 10px}.signal-row strong{font-size:8px}.signal-row small{font-size:8px}.conversation-heading{padding:20px 18px 14px}.composer{margin:0 13px}.composer-footer{padding:12px 15px 18px;gap:10px}.footnote{font-size:7px}.chat-log{margin:0 10px;padding:10px 5px}.message{max-width:98%}.footer{padding:0 16px 20px;font-size:7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Coarse response-style cues only; never present an emotion estimate as a fact. */
+#avatar[data-tone="supportive"]{filter:drop-shadow(0 0 31px rgba(117,206,255,.56))}
+#avatar[data-tone="exploratory"]{filter:drop-shadow(0 0 31px rgba(136,158,255,.52))}
+#avatar[data-tone="upbeat"]{filter:drop-shadow(0 0 34px rgba(117,255,213,.55))}
+#avatar[data-tone="neutral"]{filter:drop-shadow(0 0 24px rgba(73,219,255,.34))}
