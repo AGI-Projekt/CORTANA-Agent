@@ -1,0 +1,37 @@
+# Voice and avatar prototype
+
+## Pipeline
+
+1. The user explicitly presses the microphone control and grants browser microphone permission.
+2. The browser records a short audio clip in memory and uploads it to /api/transcribe when recording stops.
+3. The server validates extension and size, then calls the configured transcription provider.
+4. The transcript is submitted to the normal Cortana request/response workflow.
+5. The browser shows the text response and, when enabled, uses built-in SpeechSynthesis to speak it.
+6. Avatar states animate listening, thinking, and speaking. Mouth animation uses speech events where available.
+
+## Installation
+
+Install the optional LLM and web dependencies:
+
+```bash
+python -m pip install -e ".[llm,web]"
+export OPENAI_API_KEY="your-key-from-the-provider"
+python -m cortana.web
+```
+
+Open http://127.0.0.1:8000. The API key stays on the server. Do not expose this prototype beyond loopback without authentication, rate limiting, and transport-security controls.
+
+For an offline text-only UI set CORTANA_OFFLINE=1. Transcription still needs credentials and access to the provider API.
+
+## Current scope
+
+- Transcription uses the current gpt-transcribe model. See the official speech-to-text guide: https://developers.openai.com/api/docs/guides/speech-to-text
+- Speech output uses browser-native SpeechSynthesis rather than a separate API TTS model. Installed voices vary by OS, browser, and language. The interface discloses synthetic speech.
+- Captured audio is not written to disk by this app. Audio is sent to the configured transcription provider, so do not submit private recordings without authorization.
+- The application limits uploads to 25 MiB and rejects unsupported file extensions.
+- The SVG avatar is an animated 2D stand-in, not a rigged 3D model, Unreal Engine project, or physical hologram.
+- Emotion estimates are not shown as facts about the user. This UI animates operational states; tone guidance remains in the core's optional provider integration.
+
+## Security and release requirements
+
+Before non-local deployment, add authentication, rate limiting, HTTPS, deployment configuration, safe logging, quotas, and a reviewed retention policy. The default server binds to loopback. Browser microphone capture usually requires localhost or a secure context such as HTTPS.

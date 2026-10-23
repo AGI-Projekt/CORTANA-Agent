@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07141e">
+<meta name="description" content="Lokalny prototyp głosowej Cortany z animowanym awatarem.">
+<title>Cortana · Voice Interface</title>
+<link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+<div class="background-grid" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Cortana — strona główna">
+    <span class="brand-mark"><span></span><span></span><span></span></span>
+    <span><strong>CORTANA</strong><small>LILITH · NEBIRU</small></span>
+  </a>
+  <div class="system-state"><span class="status-dot"></span><span id="connection-label">SYSTEM ONLINE</span></div>
+</header>
+<main class="layout">
+<section class="avatar-panel panel" aria-label="Animowany awatar Cortany">
+  <div class="panel-kicker"><span>01 / AVATAR</span><span>HOLO-INTERFACE</span></div>
+  <div class="avatar-stage">
+    <div class="orbital orbit-a"></div><div class="orbital orbit-b"></div><div class="orbital orbit-c"></div>
+    <div class="scanline"></div>
+    <div class="avatar" id="avatar" data-state="idle" role="img" aria-label="Holograficzny awatar Cortany">
+    <svg viewBox="0 0 300 330" class="avatar-svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2ffff"/><stop offset=".36" stop-color="#51dfff"/><stop offset="1" stop-color="#3474c8"/></linearGradient>
+        <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b5f7ff" stop-opacity=".94"/><stop offset=".55" stop-color="#6bc8f0" stop-opacity=".77"/><stop offset="1" stop-color="#4575ba" stop-opacity=".86"/></linearGradient>
+        <linearGradient id="shoulders" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ef5ff" stop-opacity=".78"/><stop offset="1" stop-color="#2d6fbc" stop-opacity=".08"/></linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <path d="M57 315 Q70 256 111 248 L189 248 Q232 256 244 315Z" fill="url(#shoulders)" stroke="#76ecff" stroke-opacity=".7" stroke-width="1.5"/>
+      <path d="M92 132 Q73 52 140 28 Q211 16 224 94 L231 171 Q212 221 176 246 L116 224 Q85 183 92 132Z" fill="url(#hair)" opacity=".94"/>
+      <path d="M107 110 Q115 67 152 64 Q194 60 207 106 L199 175 Q188 218 151 229 Q119 213 106 174Z" fill="url(#skin)" stroke="#b3faff" stroke-width="1.2"/>
+      <path d="M94 130 Q83 63 132 34 Q190 5 223 70 Q231 89 221 127 Q210 95 192 78 Q162 109 112 105 L99 150Z" fill="url(#hair)" stroke="#b6fbff" stroke-width="1.4"/>
+      <path d="M111 134 Q126 121 140 131 M165 131 Q181 120 194 131" fill="none" stroke="#d7ffff" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+      <path d="M115 146 Q127 156 140 146 M166 146 Q179 156 192 146" fill="none" stroke="#1a6e9c" stroke-width="3" stroke-linecap="round"/>
+      <path d="M153 143 L147 168 L158 170" fill="none" stroke="#4d98ca" stroke-width="2" stroke-linecap="round"/>
+      <path d="M133 192 Q151 200 171 190" fill="none" stroke="#2266a3" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+      <g id="mouth"><ellipse cx="152" cy="193" rx="9" ry="2" fill="#12365e" stroke="#ccffff" stroke-width="1.3"/></g>
+      <path d="M113 172 Q102 196 122 212 M191 169 Q204 196 184 212" fill="none" stroke="#e2ffff" stroke-opacity=".55" stroke-width="1.5"/>
+      <path d="M113 225 Q151 245 191 225" fill="none" stroke="#5ce9ff" stroke-width="2" opacity=".8"/>
+      <path d="M104 253 L84 299 M196 253 L218 299" fill="none" stroke="#6deaff" stroke-width="2" opacity=".72"/>
+      <path d="M149 244 L150 302 M134 257 L125 302 M166 257 L175 302" fill="none" stroke="#75edff" stroke-opacity=".62" stroke-width="1.2"/>
+      <circle cx="151" cy="15" r="4" fill="#d4ffff" filter="url(#glow)"/>
+    </svg></div>
+    <div class="avatar-caption"><span>CORTANA / AVATAR 01</span><span id="avatar-state">READY</span></div>
+  </div>
+  <div class="signal-row">
+    <div><small>VOICE</small><strong id="voice-label">LOCAL SPEECH</strong></div>
+    <div><small>RESPONSE</small><strong id="latency-label">WAITING</strong></div>
+    <div><small>MEMORY</small><strong>SESSION ONLY</strong></div>
+  </div>
+  <p class="disclosure">Głos jest syntetyzowany przez przeglądarkę; barwa zależy od urządzenia i dostępnych głosów. Mikrofon uruchamia się wyłącznie po kliknięciu.</p>
+</section>
+<section class="conversation-panel panel" aria-label="Rozmowa z Cortaną">
+  <div class="panel-kicker"><span>02 / CONVERSATION</span><span id="session-label">SESSION ACTIVE</span></div>
+  <div class="conversation-heading">
+    <div><p class="eyebrow">PERSONAL AI INTERFACE</p><h1>Jestem <span>Cortana.</span></h1><p class="lead">Głos, kontekst i interakcja — pierwszy prototyp.</p></div>
+    <button id="clear-button" class="icon-button" type="button" title="Wyczyść bieżącą sesję" aria-label="Wyczyść bieżącą sesję">↺</button>
+  </div>
+  <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-relevant="additions">
+    <article class="message assistant-message"><div class="message-label">CORTANA <span>NOW</span></div><p>Interfejs gotowy. Możesz napisać wiadomość lub nacisnąć mikrofon, aby nagrać wypowiedź.</p></article>
+  </div>
+  <div class="working-state" id="working-state" aria-live="polite"><span class="working-dot"></span><span id="working-text">Czekam na wiadomość</span></div>
+  <form id="composer-form" class="composer">
+    <label class="visually-hidden" for="message-input">Wiadomość</label>
+    <textarea id="message-input" rows="1" maxlength="10000" placeholder="Napisz do Cortany..." required></textarea>
+    <button id="mic-button" class="mic-button" type="button" aria-label="Rozpocznij nagrywanie" title="Nagraj wiadomość">⌁</button>
+    <button id="send-button" class="send-button" type="submit" aria-label="Wyślij wiadomość">↑</button>
+  </form>
+  <div class="composer-footer">
+    <label class="toggle-label"><input id="voice-output-toggle" type="checkbox" checked><span class="toggle"></span><span>Mów odpowiedzi</span></label>
+    <span id="mic-support" class="footnote">Mikrofon: wymaga zgody</span><span class="footnote">API KEY: SERVER-SIDE</span>
+  </div>
+  <div id="error-banner" class="error-banner" role="alert" hidden></div>
+</section>
+</main>
+<footer class="footer"><span>LILITH CORTANA NEBIRU</span><span>VOICE + AVATAR PROTOTYPE / 0.3</span><span>LOCAL-FIRST UI</span></footer>
+</body>
+</html>

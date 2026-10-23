@@ -3,54 +3,67 @@
 **Project:** Lilith Cortana Nebiru  
 **Target platforms:** Windows first, Linux supported for development and runtime.
 
-CORTANA-Agent is a modular, cross-platform conversational agent foundation. It includes an initial deterministic core, an optional real LLM provider adapter, bounded volatile conversation memory, an allowlisted tool registry, a pluggable Emotion Core contract, and a controlled self-improvement proposal store. This is an early-stage project, not a complete AGI or holographic runtime.
+CORTANA-Agent is a modular conversational agent foundation. It includes a model adapter, bounded volatile conversation memory, a tool allowlist, a pluggable Emotion Core contract, a controlled self-improvement proposal store, and a first browser voice/avatar prototype.
 
-## Implemented starter components
+## Voice + avatar prototype
 
-- **Core:** request/response contracts, provider protocol, session-scoped conversation history, and explicit session clearing.
-- **LLM:** optional OpenAI Responses API adapter configured through environment variables.
-- **Emotion:** injected EmotionProvider with conservative tone-only behavior; Emotion Core 1.3 still requires its separate package on PYTHONPATH.
-- **Memory:** bounded in-process history with retention and explicit clearing; not persisted to disk.
-- **Tools:** explicit allowlist and required-argument validation; no implicit shell access.
-- **Self-improvement:** structured JSON proposals and a human-reviewed workflow; proposal data is never executed.
-- **CI:** GitHub Actions test matrix for Windows/Linux and Python 3.12.
+- Browser interface with a stylized animated SVG avatar and states for listening, thinking, speaking, and idle.
+- Explicit microphone permission and a manual record/stop workflow.
+- Speech transcription with the gpt-transcribe audio model, a 25 MiB request limit, and no local audio-file persistence.
+- Text replies through the existing Cortana agent.
+- Browser-native speech synthesis; quality and language depend on voices installed on the device.
+- Session-scoped volatile chat history with a clear-session control.
+- Local-only server default. No authentication is provided; do not expose the prototype to the public internet.
 
-Speech, image perception, persistent memory, desktop UI, and holographic/Unreal presentation remain future work.
+This is a visual prototype, not a true 3D hologram or Unreal Engine scene. Full-duplex voice and production authentication remain future work.
 
-## Quick start
+## Install and run
 
 Requires Python 3.12 or newer.
 
-Install test dependencies:
+Offline text UI:
 
 ```bash
-python -m pip install -e ".[test]"
-python -m pytest -q
+python -m pip install -e ".[test,web]"
 ```
 
-Run the deterministic offline demo:
+Set offline mode and start the browser interface:
 
 ```bash
-python -m cortana --offline
+# Linux/macOS
+export CORTANA_OFFLINE=1
+python -m cortana.web
 ```
 
-For a real LLM, install the optional provider and export your API key:
+Open http://127.0.0.1:8000. Voice transcription still needs API credentials.
+
+For real model responses and speech-to-text:
 
 ```bash
-python -m pip install -e ".[llm]"
+python -m pip install -e ".[llm,web]"
+# Linux/macOS
+unset CORTANA_OFFLINE
 export OPENAI_API_KEY="your-key-from-the-provider"
-python -m cortana
+python -m cortana.web
 ```
 
 Windows PowerShell:
 
 ```powershell
+python -m pip install -e ".[llm,web]"
+Remove-Item Env:CORTANA_OFFLINE -ErrorAction SilentlyContinue
 $env:OPENAI_API_KEY = "your-key-from-the-provider"
-python -m cortana
+python -m cortana.web
 ```
 
-See docs/LLM_PROVIDER.md for model settings and privacy boundaries.
+Never commit API keys or put them in the browser. The server binds to 127.0.0.1 by default. Microphone permission typically requires localhost or HTTPS.
 
-## Security and project status
+## Existing components
 
-See .env.example, docs/SECURITY.md, and docs/SELF_IMPROVEMENT.md. Never commit credentials or private sensor data. Emotion estimates can adjust tone only and never grant permissions. Feature status is recorded in docs/ROADMAP.md.
+- Core request/response contracts and optional OpenAI Responses provider.
+- Session memory stored only in process RAM.
+- Emotion Core 1.3 adapter contract; its external package must be installed separately.
+- Tool registry with explicit allowlist.
+- Structured self-improvement proposals requiring review and tests.
+
+See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, and docs/SELF_IMPROVEMENT.md.
