@@ -80,3 +80,10 @@ This is energy-driven mouth motion, not phoneme/viseme-accurate lip synchronizat
 The Realtime output transcript stream now feeds a bounded character-to-viseme scheduler. Polish vowel and bilabial/labiodental graphemes map to coarse mouth profiles (open, mid, wide, round, closed, teeth); Three.js and the 2D fallback consume the same visual cue family with smoothed transitions. This provides more articulation variety than pure amplitude-driven opening.
 
 Important limitation: transcript text deltas are not time-aligned phoneme or viseme timestamps. The scheduler therefore uses estimated per-character durations and is only an approximation. It does not claim phoneme-accurate synchronization. Production lip sync should consume trusted audio-aligned viseme/phoneme timestamps and drive a properly rigged avatar's blend shapes.
+
+
+## Timestamped viseme timeline contract
+
+The browser scheduler supports a future audio-aligned input contract through CortanaVisemeScheduler.playTimeline(events, anchorTimeMs). Each event carries a known viseme name plus atMs and durationMs relative to a caller-supplied monotonic-clock anchor (the same clock domain as performance.now()). Event count, offsets, durations, and allowed profile names are bounded and validated before current animation is interrupted. Reset cancels all scheduled timers and returns the face to neutral.
+
+This API is a timing-capable interface, not a source of accurate timings. The current Realtime path still receives transcript deltas and uses approximate grapheme durations; it does not call playTimeline with acoustic phoneme timings. Exact alignment remains blocked on a provider that emits audio-aligned phoneme/viseme timestamps. Node-based deterministic tests validate cue timing, future anchors, malformed input, cancellation, and coexistence with the approximate text scheduler.
