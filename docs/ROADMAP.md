@@ -30,7 +30,8 @@ Status is updated only when implementation and tests have been verified.
 - [x] Add a full-duplex Realtime API/WebRTC path with a short-lived client secret.
 - [x] Add a per-session voice chooser, Polish transcription configuration, and explicit connect/disconnect.
 - [x] Drive procedural 3D/SVG mouth opening from live output-audio energy and add procedural blinking.
-- [ ] Replace procedural geometry with a designed, rigged 3D avatar and proper viseme lip sync.
+- [x] Add a coarse grapheme-to-viseme scheduler and smoothed mouth-profile transitions in 3D/2D.
+- [ ] Replace procedural geometry with a designed, rigged 3D avatar and audio-aligned, phoneme-accurate viseme lip sync.
 - [ ] Add production authentication, rate limiting, and deployment hardening.
 - [x] Add opt-in Realtime transcript-to-Emotion Core guidance with neutral fallback and privacy-limited audit records.
 - [ ] Validate opt-in behavior against a locally installed Emotion Core package and live Realtime key.

@@ -136,6 +136,13 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
     root.add(particles);
 
     let lastState = "idle";
+    let activeViseme = "neutral";
+    window.addEventListener("cortana:viseme", (event) => {
+      const name = event && event.detail && event.detail.viseme;
+      if (["neutral", "open", "mid", "wide", "round", "closed", "teeth"].includes(name)) {
+        activeViseme = name;
+      }
+    });
     let nextBlinkAt = 1.7 + Math.random() * 1.8;
     let blinkStartedAt = -1;
     const clock = new THREE.Clock();
@@ -170,9 +177,22 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
       const measuredMouth = Math.max(0, Math.min(1, Number(wrapper.dataset.mouthOpen || "0")));
       const demoMouth = speaking ? 0.12 + Math.abs(Math.sin(elapsed * 12.5)) * 0.45 : 0;
       const mouthDrive = liveAudioDriven ? measuredMouth : demoMouth;
-      mouth.scale.x = 0.14 + mouthDrive * 0.025;
-      mouth.scale.y = 0.025 + mouthDrive * 0.105;
-      mouth.position.y = -0.38 + mouthDrive * 0.015;
+      const visemeProfiles = {
+        neutral: [0.14, 0.025, -0.38],
+        open: [0.115, 0.095, -0.397],
+        mid: [0.132, 0.061, -0.389],
+        wide: [0.17, 0.034, -0.38],
+        round: [0.078, 0.078, -0.394],
+        closed: [0.12, 0.009, -0.383],
+        teeth: [0.145, 0.029, -0.384]
+      };
+      const profile = visemeProfiles[activeViseme] || visemeProfiles.neutral;
+      const audioBoost = liveAudioDriven ? mouthDrive * (activeViseme === "closed" ? 0.006 : 0.022) : 0;
+      const blend = 0.28;
+      mouth.scale.x += (profile[0] - mouth.scale.x) * blend;
+      mouth.scale.y += (profile[1] + audioBoost - mouth.scale.y) * blend;
+      mouth.position.y += (profile[2] - mouth.position.y) * blend;
+      lipHighlight.scale.x += ((activeViseme === "wide" ? 1.14 : activeViseme === "round" ? 0.64 : 1) - lipHighlight.scale.x) * blend;
 
       // Procedural blink with a short close/open envelope; restore eye scale after each blink.
       if (elapsed >= nextBlinkAt) {

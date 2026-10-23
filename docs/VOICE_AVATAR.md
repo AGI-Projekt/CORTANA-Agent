@@ -73,3 +73,10 @@ Operational audit records are bounded and in-memory by default. They contain onl
 The WebRTC remote audio stream is sampled locally with the Web Audio API analyser. A smoothed RMS energy value drives mouth opening in the procedural Three.js avatar and the SVG fallback; audio itself is not copied into audit records or sent to an additional endpoint for lip-sync. The 3D avatar also performs procedural blink cycles and uses a subtle fallback mouth motion when live audio analysis is unavailable.
 
 This is energy-driven mouth motion, not phoneme/viseme-accurate lip synchronization. Better lip sync will require audio-aligned visemes or a rigged character with blend shapes. Analyser resources and the animation loop are stopped when the live session is disconnected.
+
+
+## Approximate viseme controller
+
+The Realtime output transcript stream now feeds a bounded character-to-viseme scheduler. Polish vowel and bilabial/labiodental graphemes map to coarse mouth profiles (open, mid, wide, round, closed, teeth); Three.js and the 2D fallback consume the same visual cue family with smoothed transitions. This provides more articulation variety than pure amplitude-driven opening.
+
+Important limitation: transcript text deltas are not time-aligned phoneme or viseme timestamps. The scheduler therefore uses estimated per-character durations and is only an approximation. It does not claim phoneme-accurate synchronization. Production lip sync should consume trusted audio-aligned viseme/phoneme timestamps and drive a properly rigged avatar's blend shapes.

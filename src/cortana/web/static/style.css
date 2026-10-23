@@ -55,3 +55,12 @@
 
 /* Live audio analyser drives mouth scale directly; avoid competing with the demo keyframe. */
 #avatar[data-live-audio="true"][data-state="speaking"] #mouth{animation:none}
+
+/* Approximate text-driven mouth shapes for the 2D fallback. */
+#avatar:not(.three-active)[data-viseme="open"] #mouth{transform:scaleY(3.2) scaleX(.8)}
+#avatar:not(.three-active)[data-viseme="mid"] #mouth{transform:scaleY(2.1) scaleX(.95)}
+#avatar:not(.three-active)[data-viseme="wide"] #mouth{transform:scaleY(1.1) scaleX(1.35)}
+#avatar:not(.three-active)[data-viseme="round"] #mouth{transform:scaleY(2.6) scaleX(.66)}
+#avatar:not(.three-active)[data-viseme="closed"] #mouth{transform:scaleY(.42) scaleX(.9)}
+#avatar:not(.three-active)[data-viseme="teeth"] #mouth{transform:scaleY(1.25) scaleX(1.1)}
+#avatar:not(.three-active)[data-viseme="neutral"] #mouth{transform:scaleY(1) scaleX(1)}
