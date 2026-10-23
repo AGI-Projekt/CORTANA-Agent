@@ -66,3 +66,10 @@ The realtime transcript-to-style path is opt-in in the browser and off by defaul
 The server returns only a coarse presentation style (neutral, supportive, exploratory, or upbeat) and a fixed server-authored Realtime instruction hint. Audit records do not retain transcript text. The instruction update is sent over the Realtime data channel and guides subsequent responses; the current spoken response may already be underway when transcription completes. Disabling the checkbox resets the avatar style and requests neutral session instructions.
 
 Operational audit records are bounded and in-memory by default. They contain only timestamp, event type, coarse outcome, and duration; no transcript, audio, user/session identifier, inferred category, model output, or API secret. Provider errors and invalid request correlation fall back to neutral presentation.
+
+
+## Audio-driven 3D facial animation
+
+The WebRTC remote audio stream is sampled locally with the Web Audio API analyser. A smoothed RMS energy value drives mouth opening in the procedural Three.js avatar and the SVG fallback; audio itself is not copied into audit records or sent to an additional endpoint for lip-sync. The 3D avatar also performs procedural blink cycles and uses a subtle fallback mouth motion when live audio analysis is unavailable.
+
+This is energy-driven mouth motion, not phoneme/viseme-accurate lip synchronization. Better lip sync will require audio-aligned visemes or a rigged character with blend shapes. Analyser resources and the animation loop are stopped when the live session is disconnected.

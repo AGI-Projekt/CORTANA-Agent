@@ -136,6 +136,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
     root.add(particles);
 
     let lastState = "idle";
+    let nextBlinkAt = 1.7 + Math.random() * 1.8;
+    let blinkStartedAt = -1;
     const clock = new THREE.Clock();
     const resize = () => {
       const width = Math.max(1, mount.clientWidth);
@@ -162,8 +164,27 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
       orbitB.rotation.y = 0.32 + elapsed * 0.075;
       orbitC.rotation.z = 0.4 - elapsed * 0.06;
       particles.rotation.y = elapsed * 0.035;
-      mouth.scale.y = speaking ? 0.7 + Math.abs(Math.sin(elapsed * 12.5)) * 2.7 : 0.35;
-      mouth.position.y = -0.38 + (speaking ? Math.abs(Math.sin(elapsed * 12.5)) * 0.009 : 0);
+
+      // Use measured output-audio energy when WebRTC is active; otherwise keep a subtle demo motion.
+      const liveAudioDriven = wrapper.dataset.liveAudio === "true";
+      const measuredMouth = Math.max(0, Math.min(1, Number(wrapper.dataset.mouthOpen || "0")));
+      const demoMouth = speaking ? 0.12 + Math.abs(Math.sin(elapsed * 12.5)) * 0.45 : 0;
+      const mouthDrive = liveAudioDriven ? measuredMouth : demoMouth;
+      mouth.scale.x = 0.14 + mouthDrive * 0.025;
+      mouth.scale.y = 0.025 + mouthDrive * 0.105;
+      mouth.position.y = -0.38 + mouthDrive * 0.015;
+
+      // Procedural blink with a short close/open envelope; restore eye scale after each blink.
+      if (elapsed >= nextBlinkAt) {
+        blinkStartedAt = elapsed;
+        nextBlinkAt = elapsed + 2.8 + Math.random() * 3.8;
+      }
+      const blinkElapsed = blinkStartedAt < 0 ? 1 : elapsed - blinkStartedAt;
+      const blink = blinkElapsed >= 0 && blinkElapsed < 0.17
+        ? Math.sin((blinkElapsed / 0.17) * Math.PI)
+        : 0;
+      eyeLeft.scale.y = 0.09 * (1 - blink * 0.94);
+      eyeRight.scale.y = 0.09 * (1 - blink * 0.94);
       if (listening) {
         ringMaterial.opacity = 0.65;
         faceLight.intensity = 5.2;

@@ -18,6 +18,9 @@
   let autoStopTimer = null, busy = false, recording = false, voiceCounter = 0;
   let realtimeActive = false, realtimeConnecting = false, realtimePeer = null, realtimeChannel = null;
   let realtimeStream = null, liveAssistantP = null, liveAssistantText = "";
+  let remoteAudioContext = null, remoteAudioAnalyser = null, remoteAudioSource = null;
+  let remoteAudioSamples = null, remoteAudioFrame = null, remoteAudioLevel = 0;
+
   const labels = { idle:"READY", listening:"LISTENING", thinking:"PROCESSING", speaking:"SPEAKING" };
   const toneLabels = { neutral:"NEUTRAL", supportive:"SUPPORTIVE", exploratory:"EXPLORATORY", upbeat:"UPBEAT" };
   function setAvatarState(state) {
@@ -98,6 +101,65 @@
       };
       window.speechSynthesis.speak(utterance);
     });
+  }
+
+  function stopRemoteAudioAnalysis() {
+    if (remoteAudioFrame !== null) cancelAnimationFrame(remoteAudioFrame);
+    remoteAudioFrame = null;
+    if (remoteAudioSource) {
+      try { remoteAudioSource.disconnect(); } catch (_) {}
+    }
+    remoteAudioSource = null;
+    remoteAudioAnalyser = null;
+    remoteAudioSamples = null;
+    remoteAudioLevel = 0;
+    el.avatar.dataset.liveAudio = "false";
+    el.avatar.dataset.mouthOpen = "0";
+    const mouth = document.getElementById("mouth");
+    if (mouth) mouth.style.transform = "";
+    if (remoteAudioContext) {
+      const oldContext = remoteAudioContext;
+      remoteAudioContext = null;
+      oldContext.close().catch(() => {});
+    }
+  }
+
+  function startRemoteAudioAnalysis(stream) {
+    stopRemoteAudioAnalysis();
+    if (!stream || typeof window.AudioContext !== "function") return;
+    try {
+      remoteAudioContext = new AudioContext();
+      remoteAudioAnalyser = remoteAudioContext.createAnalyser();
+      remoteAudioAnalyser.fftSize = 256;
+      remoteAudioAnalyser.smoothingTimeConstant = 0.2;
+      remoteAudioSource = remoteAudioContext.createMediaStreamSource(stream);
+      remoteAudioSource.connect(remoteAudioAnalyser);
+      remoteAudioSamples = new Uint8Array(remoteAudioAnalyser.fftSize);
+      el.avatar.dataset.liveAudio = "true";
+      if (remoteAudioContext.state === "suspended") remoteAudioContext.resume().catch(() => {});
+      const sampleAudio = () => {
+        if (!remoteAudioAnalyser || !remoteAudioSamples) return;
+        remoteAudioAnalyser.getByteTimeDomainData(remoteAudioSamples);
+        let sumSquares = 0;
+        for (let i = 0; i < remoteAudioSamples.length; i += 1) {
+          const sample = (remoteAudioSamples[i] - 128) / 128;
+          sumSquares += sample * sample;
+        }
+        const rms = Math.sqrt(sumSquares / remoteAudioSamples.length);
+        const target = Math.max(0, Math.min(1, (rms - 0.018) * 15));
+        const smoothing = target > remoteAudioLevel ? 0.55 : 0.16;
+        remoteAudioLevel += (target - remoteAudioLevel) * smoothing;
+        el.avatar.dataset.mouthOpen = String(remoteAudioLevel);
+        const mouth = document.getElementById("mouth");
+        if (mouth && !el.avatar.classList.contains("three-active")) {
+          mouth.style.transform = "scaleY(" + (1 + remoteAudioLevel * 2.4) + ")";
+        }
+        remoteAudioFrame = requestAnimationFrame(sampleAudio);
+      };
+      remoteAudioFrame = requestAnimationFrame(sampleAudio);
+    } catch (_) {
+      stopRemoteAudioAnalysis();
+    }
   }
 
   function setRealtimeCaption(text, active) {
@@ -229,6 +291,7 @@
     }
   }
   function cleanupRealtime() {
+    stopRemoteAudioAnalysis();
     realtimeActive = false;
     realtimeConnecting = false;
     liveAssistantP = null;
@@ -289,6 +352,7 @@
       realtimePeer = peer;
       peer.ontrack = (event) => {
         el.realtimeAudio.srcObject = event.streams[0];
+        startRemoteAudioAnalysis(event.streams && event.streams[0]);
         const playResult = el.realtimeAudio.play();
         if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
       };
