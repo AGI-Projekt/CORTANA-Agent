@@ -83,7 +83,7 @@ class RealtimeSessionProvider:
 
     def create_client_secret(self, voice: str | None = None) -> dict[str, Any]:
         """Mint a short-lived secret and return only client-safe session metadata."""
-        selected_voice = self._validate_voice(voice or self.voice)
+        selected_voice = self._validate_voice(self.voice if voice is None else voice)
         session = {
             "type": "realtime",
             "model": self.model,
