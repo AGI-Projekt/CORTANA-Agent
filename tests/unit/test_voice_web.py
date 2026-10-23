@@ -102,3 +102,19 @@ def test_viseme_scheduler_exposes_bounded_timestamped_timeline_contract():
     assert "MAX_TIMELINE_EVENTS = 512" in scheduler
     assert "MAX_OFFSET_MS = 120000" in scheduler
     assert 'source: source || "text"' in scheduler
+
+
+def test_audio_clock_script_is_loaded_before_viseme_scheduler_and_app():
+    from pathlib import Path
+    import cortana.web.app as app_module
+
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    page = (static_dir / "index.html").read_text(encoding="utf-8")
+    app_script = (static_dir / "app.js").read_text(encoding="utf-8")
+    clock_script = (static_dir / "audio-clock.js").read_text(encoding="utf-8")
+
+    assert page.index("/static/audio-clock.js") < page.index("/static/visemes.js")
+    assert page.index("/static/visemes.js") < page.index("/static/app.js")
+    assert "markOutputStart" in clock_script
+    assert "CortanaAudioClock.markOutputStart" in app_script
+    assert "remoteAudioAnalyser.connect(remoteAudioContext.destination)" in app_script

@@ -19,6 +19,9 @@
   let realtimeActive = false, realtimeConnecting = false, realtimePeer = null, realtimeChannel = null;
   let realtimeStream = null, liveAssistantP = null, liveAssistantText = "";
   let remoteAudioContext = null, remoteAudioAnalyser = null, remoteAudioSource = null;
+  let remotePlaybackAnchor = null;
+  let remoteAudioOnsetDetected = false;
+
   let remoteAudioSamples = null, remoteAudioFrame = null, remoteAudioLevel = 0;
 
   const labels = { idle:"READY", listening:"LISTENING", thinking:"PROCESSING", speaking:"SPEAKING" };
@@ -113,6 +116,9 @@
     remoteAudioAnalyser = null;
     remoteAudioSamples = null;
     remoteAudioLevel = 0;
+    remotePlaybackAnchor = null;
+    remoteAudioOnsetDetected = false;
+    if (window.CortanaAudioClock) window.CortanaAudioClock.resetOutputAnchor();
     el.avatar.dataset.liveAudio = "false";
     el.avatar.dataset.mouthOpen = "0";
     const mouth = document.getElementById("mouth");
@@ -126,7 +132,7 @@
 
   function startRemoteAudioAnalysis(stream) {
     stopRemoteAudioAnalysis();
-    if (!stream || typeof window.AudioContext !== "function") return;
+    if (!stream || typeof window.AudioContext !== "function") return false;
     try {
       remoteAudioContext = new AudioContext();
       remoteAudioAnalyser = remoteAudioContext.createAnalyser();
@@ -134,6 +140,8 @@
       remoteAudioAnalyser.smoothingTimeConstant = 0.2;
       remoteAudioSource = remoteAudioContext.createMediaStreamSource(stream);
       remoteAudioSource.connect(remoteAudioAnalyser);
+      // Play the analyzed stream through the same Web Audio clock domain.
+      remoteAudioAnalyser.connect(remoteAudioContext.destination);
       remoteAudioSamples = new Uint8Array(remoteAudioAnalyser.fftSize);
       el.avatar.dataset.liveAudio = "true";
       if (remoteAudioContext.state === "suspended") remoteAudioContext.resume().catch(() => {});
@@ -146,6 +154,14 @@
           sumSquares += sample * sample;
         }
         const rms = Math.sqrt(sumSquares / remoteAudioSamples.length);
+        // Capture an output-clock reference on first audible frame, not phoneme timing.
+        if (!remoteAudioOnsetDetected && rms >= 0.035 && window.CortanaAudioClock) {
+          remoteAudioOnsetDetected = true;
+          try {
+            remotePlaybackAnchor = window.CortanaAudioClock.markOutputStart(remoteAudioContext);
+            el.avatar.dataset.audioAnchorSource = remotePlaybackAnchor.source;
+          } catch (_) { remotePlaybackAnchor = null; }
+        }
         const target = Math.max(0, Math.min(1, (rms - 0.018) * 15));
         const smoothing = target > remoteAudioLevel ? 0.55 : 0.16;
         remoteAudioLevel += (target - remoteAudioLevel) * smoothing;
@@ -157,8 +173,10 @@
         remoteAudioFrame = requestAnimationFrame(sampleAudio);
       };
       remoteAudioFrame = requestAnimationFrame(sampleAudio);
+      return true;
     } catch (_) {
       stopRemoteAudioAnalysis();
+      return false;
     }
   }
 
@@ -256,6 +274,9 @@
       }
     } else if (event.type === "response.created") {
       if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.reset();
+      remoteAudioOnsetDetected = false;
+      remotePlaybackAnchor = null;
+      if (window.CortanaAudioClock) window.CortanaAudioClock.resetOutputAnchor();
       setAvatarState("thinking");
       setWorking("Cortana odpowiada…", true);
       liveAssistantP = null;
@@ -314,6 +335,7 @@
     if (el.realtimeAudio) {
       el.realtimeAudio.pause();
       el.realtimeAudio.srcObject = null;
+      el.realtimeAudio.muted = false;
     }
     el.realtimeButton.textContent = "Połącz głos na żywo";
     el.realtimeButton.dataset.connected = "false";
@@ -355,9 +377,14 @@
       realtimePeer = peer;
       peer.ontrack = (event) => {
         el.realtimeAudio.srcObject = event.streams[0];
-        startRemoteAudioAnalysis(event.streams && event.streams[0]);
-        const playResult = el.realtimeAudio.play();
-        if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
+        el.realtimeAudio.muted = true;
+        const analysisStarted = startRemoteAudioAnalysis(event.streams && event.streams[0]);
+        if (!analysisStarted) {
+          // Browser fallback: keep voice audible if Web Audio analysis is unavailable.
+          el.realtimeAudio.muted = false;
+          const playResult = el.realtimeAudio.play();
+          if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
+        }
       };
       peer.onconnectionstatechange = () => {
         if (peer.connectionState === "failed") {

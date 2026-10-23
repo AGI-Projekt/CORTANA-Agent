@@ -87,3 +87,10 @@ Important limitation: transcript text deltas are not time-aligned phoneme or vis
 The browser scheduler supports a future audio-aligned input contract through CortanaVisemeScheduler.playTimeline(events, anchorTimeMs). Each event carries a known viseme name plus atMs and durationMs relative to a caller-supplied monotonic-clock anchor (the same clock domain as performance.now()). Event count, offsets, durations, and allowed profile names are bounded and validated before current animation is interrupted. Reset cancels all scheduled timers and returns the face to neutral.
 
 This API is a timing-capable interface, not a source of accurate timings. The current Realtime path still receives transcript deltas and uses approximate grapheme durations; it does not call playTimeline with acoustic phoneme timings. Exact alignment remains blocked on a provider that emits audio-aligned phoneme/viseme timestamps. Node-based deterministic tests validate cue timing, future anchors, malformed input, cancellation, and coexistence with the approximate text scheduler.
+
+
+## Audio playout clock bridge
+
+The browser-side audio-clock.js adapter maps Web Audio output timestamps to the same monotonic performance.now() clock used by viseme scheduling. When getOutputTimestamp() is unavailable or invalid, it reports an explicit performance-clock fallback. The remote WebRTC audio is routed through MediaStreamAudioSourceNode → AnalyserNode → AudioContext.destination so analyser and audible output share a Web Audio clock domain instead of separate HTML media and analyser clocks.
+
+On the first audible output frame of a response, the browser captures an output-clock anchor and dispatches cortana:audio-playout-anchor. Integrators can pass the returned anchorTimeMs to CortanaVisemeScheduler.playTimeline(events, anchorTimeMs) or use CortanaAudioClock.scheduleTimeline(scheduler, events). This bridge does not generate acoustic phoneme/viseme timestamps by itself. The current text-driven path remains approximate. The anchor is reset for each Realtime response and when the session closes.
