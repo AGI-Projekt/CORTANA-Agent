@@ -43,3 +43,10 @@
 #realtime-audio{display:none}
 #realtime-caption[data-connected="true"]{color:#8affe0}
 @media(max-width:500px){.realtime-button{flex:1 1 100%}.live-voice-label{flex:1 1 auto}.voice-select{padding:6px}.composer-footer{align-items:center}}
+
+
+/* Coarse response-style cues only; never present an emotion estimate as a fact. */
+#avatar[data-tone="supportive"]{filter:drop-shadow(0 0 31px rgba(117,206,255,.56))}
+#avatar[data-tone="exploratory"]{filter:drop-shadow(0 0 31px rgba(136,158,255,.52))}
+#avatar[data-tone="upbeat"]{filter:drop-shadow(0 0 34px rgba(117,255,213,.55))}
+#avatar[data-tone="neutral"]{filter:drop-shadow(0 0 24px rgba(73,219,255,.34))}

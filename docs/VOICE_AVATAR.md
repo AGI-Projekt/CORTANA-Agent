@@ -52,3 +52,8 @@ The browser voice chooser allows a supported voice per new session. The voice is
 The 3D prototype uses Three.js from a version-pinned CDN import. A 2D SVG fallback remains visible if WebGL initialization fails. Animations represent operational states; the current mouth movement is approximate and is not phoneme/viseme-accurate lip sync.
 
 Important: the Realtime service is metered and requires access to the configured model. The local offline demo does not provide live audio. Do not expose the local server publicly without authentication, rate limiting, and deployment hardening. Live voice is an AI-generated voice, not a human recording.
+
+
+## Response-style visualization
+
+The avatar can display one of four coarse presentation cues: neutral, supportive, exploratory, or upbeat. The API emits a non-neutral cue only when the core explicitly marks tone adjustment as allowed. The cue describes response presentation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, or disabled estimates fall back to neutral. The cue is local UI state and is not stored as a persistent user profile.
