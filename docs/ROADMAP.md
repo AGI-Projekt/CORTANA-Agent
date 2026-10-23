@@ -25,10 +25,13 @@ Status is updated only when implementation and tests have been verified.
 - [x] Browser-native speech synthesis with synthetic-voice disclosure.
 - [x] Mock-backed tests for audio and web routes; Windows/Linux CI.
 - [x] Coarse emotion-guided avatar presentation cues with neutral fallback and tests.
-- [ ] Validate live transcription and a live model response with a maintainer-managed key.
-- [ ] Replace the SVG stand-in with a designed and rigged 3D avatar.
-- [ ] Add a full-duplex Realtime API/WebRTC path with ephemeral session credentials.
+- [ ] Validate live transcription and a live voice conversation with a maintainer-managed key.
+- [x] Add a procedural Three.js WebGL avatar with a 2D fallback.
+- [x] Add a full-duplex Realtime API/WebRTC path with a short-lived client secret.
+- [x] Add a per-session voice chooser, Polish transcription configuration, and explicit connect/disconnect.
+- [ ] Replace procedural geometry with a designed, rigged 3D avatar and proper viseme lip sync.
 - [ ] Add production authentication, rate limiting, and deployment hardening.
+- [ ] Add moderation/observability for the Realtime path and bring voice turns through the Emotion Core policy where appropriate.
 
 ## Phase 3 — multimodal and presentation
 - [ ] Vision adapter with consent and explicit camera activation.

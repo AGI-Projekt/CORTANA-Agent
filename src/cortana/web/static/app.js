@@ -6,13 +6,17 @@
     form: byId("composer-form"), input: byId("message-input"), send: byId("send-button"),
     mic: byId("mic-button"), clear: byId("clear-button"), voiceOutput: byId("voice-output-toggle"),
     working: byId("working-state"), workingText: byId("working-text"), error: byId("error-banner"),
-    latency: byId("latency-label"), micSupport: byId("mic-support"), connection: byId("connection-label")
+    latency: byId("latency-label"), micSupport: byId("mic-support"), connection: byId("connection-label"),
+    realtimeButton: byId("realtime-button"), realtimeVoice: byId("realtime-voice-select"),
+    realtimeCaption: byId("realtime-caption"), realtimeAudio: byId("realtime-audio")
   };
   const newSession = () => (window.crypto && typeof window.crypto.randomUUID === "function")
     ? window.crypto.randomUUID()
     : "session-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
   let sessionId = newSession(), recorder = null, mediaStream = null, recordedChunks = [];
   let autoStopTimer = null, busy = false, recording = false, voiceCounter = 0;
+  let realtimeActive = false, realtimeConnecting = false, realtimePeer = null, realtimeChannel = null;
+  let realtimeStream = null, liveAssistantP = null, liveAssistantText = "";
   const labels = { idle:"READY", listening:"LISTENING", thinking:"PROCESSING", speaking:"SPEAKING" };
   const toneLabels = { neutral:"NEUTRAL", supportive:"SUPPORTIVE", exploratory:"EXPLORATORY", upbeat:"UPBEAT" };
   function setAvatarState(state) {
@@ -47,9 +51,11 @@
   }
   function setBusy(value) {
     busy = value;
-    el.send.disabled = value;
-    el.input.disabled = value;
-    el.mic.disabled = value;
+    const locked = value || realtimeActive || realtimeConnecting;
+    el.send.disabled = locked;
+    el.input.disabled = locked;
+    el.mic.disabled = locked;
+    el.realtimeButton.disabled = value && !realtimeActive;
   }
   function choosePolishVoice() {
     if (!("speechSynthesis" in window)) return null;
@@ -92,6 +98,190 @@
       window.speechSynthesis.speak(utterance);
     });
   }
+
+  function setRealtimeCaption(text, active) {
+    el.realtimeCaption.textContent = text;
+    el.realtimeCaption.dataset.connected = active ? "true" : "false";
+  }
+  function appendLiveTranscript(role, text, finalText) {
+    if (role === "user") {
+      const clean = (text || "").trim();
+      if (clean) addMessage("user", clean);
+      return;
+    }
+    if (!liveAssistantP) {
+      addMessage("assistant", "");
+      liveAssistantP = el.chatLog.lastElementChild.querySelector("p");
+      liveAssistantText = "";
+    }
+    if (typeof finalText === "string" && finalText.trim()) {
+      liveAssistantText = finalText;
+    } else {
+      liveAssistantText += text || "";
+    }
+    liveAssistantP.textContent = liveAssistantText;
+    el.chatLog.scrollTop = el.chatLog.scrollHeight;
+  }
+  function handleRealtimeEvent(event) {
+    if (!event || typeof event.type !== "string") return;
+    if (event.type === "input_audio_buffer.speech_started") {
+      setAvatarState("listening");
+      setWorking("Słucham — tryb rozmowy na żywo", true);
+    } else if (event.type === "input_audio_buffer.speech_stopped") {
+      setAvatarState("thinking");
+      setWorking("Cortana przygotowuje odpowiedź…", true);
+    } else if (event.type === "conversation.item.input_audio_transcription.completed") {
+      appendLiveTranscript("user", event.transcript || "");
+    } else if (event.type === "response.created") {
+      setAvatarState("thinking");
+      setWorking("Cortana odpowiada…", true);
+      liveAssistantP = null;
+      liveAssistantText = "";
+    } else if (event.type === "response.output_audio.delta" || event.type === "response.audio.delta") {
+      setAvatarState("speaking");
+    } else if (
+      event.type === "response.output_audio_transcript.delta" ||
+      event.type === "response.audio_transcript.delta"
+    ) {
+      appendLiveTranscript("assistant", event.delta || "");
+    } else if (
+      event.type === "response.output_audio_transcript.done" ||
+      event.type === "response.audio_transcript.done"
+    ) {
+      if (typeof event.transcript === "string" && event.transcript.trim()) {
+        appendLiveTranscript("assistant", "", event.transcript);
+      }
+    } else if (
+      event.type === "response.output_audio.done" ||
+      event.type === "response.audio.done" ||
+      event.type === "response.done"
+    ) {
+      if (realtimeActive) {
+        setAvatarState("listening");
+        setWorking("Rozmowa na żywo — Cortana słucha", true);
+      }
+      liveAssistantP = null;
+      liveAssistantText = "";
+    } else if (event.type === "error") {
+      showError("Sesja głosowa zgłosiła błąd. Zakończ połączenie i spróbuj ponownie.");
+      setWorking("Problem z sesją głosową", false);
+      setAvatarState("idle");
+    }
+  }
+  function cleanupRealtime() {
+    realtimeActive = false;
+    realtimeConnecting = false;
+    liveAssistantP = null;
+    liveAssistantText = "";
+    if (realtimeChannel) {
+      try { realtimeChannel.close(); } catch (_) {}
+      realtimeChannel = null;
+    }
+    if (realtimePeer) {
+      try { realtimePeer.close(); } catch (_) {}
+      realtimePeer = null;
+    }
+    if (realtimeStream) {
+      realtimeStream.getTracks().forEach((track) => track.stop());
+      realtimeStream = null;
+    }
+    if (el.realtimeAudio) {
+      el.realtimeAudio.pause();
+      el.realtimeAudio.srcObject = null;
+    }
+    el.realtimeButton.textContent = "Połącz głos na żywo";
+    el.realtimeButton.dataset.connected = "false";
+    el.realtimeButton.setAttribute("aria-pressed", "false");
+    el.realtimeVoice.disabled = false;
+    el.micSupport.textContent = "Mikrofon: wymaga zgody";
+    setRealtimeCaption("REALTIME: OFF", false);
+    setBusy(false);
+    setAvatarState("idle");
+    setWorking("Czekam na wiadomość", false);
+  }
+  async function startRealtime() {
+    if (busy || recording || realtimeConnecting || realtimeActive) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) {
+      showError("Ta przeglądarka nie obsługuje WebRTC lub mikrofonu. Użyj aktualnej przeglądarki na localhost albo HTTPS.");
+      return;
+    }
+    showError("");
+    realtimeConnecting = true;
+    setBusy(true);
+    setAvatarState("thinking");
+    setWorking("Przygotowuję bezpieczną sesję głosową…", true);
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    try {
+      // The microphone is requested only after the user activates this control.
+      realtimeStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+      const tokenResponse = await fetch("/api/realtime/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voice: el.realtimeVoice.value })
+      });
+      const token = await tokenResponse.json().catch(() => ({}));
+      if (!tokenResponse.ok || typeof token.value !== "string" || !token.value) {
+        throw new Error(token.detail || "Nie można utworzyć sesji głosowej. Sprawdź klucz API i dostęp do modelu.");
+      }
+      const peer = new RTCPeerConnection();
+      realtimePeer = peer;
+      peer.ontrack = (event) => {
+        el.realtimeAudio.srcObject = event.streams[0];
+        const playResult = el.realtimeAudio.play();
+        if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
+      };
+      peer.onconnectionstatechange = () => {
+        if (peer.connectionState === "failed") {
+          showError("Połączenie głosowe zostało przerwane.");
+          cleanupRealtime();
+        }
+      };
+      realtimeStream.getTracks().forEach((track) => peer.addTrack(track, realtimeStream));
+      const channel = peer.createDataChannel("oai-events");
+      realtimeChannel = channel;
+      channel.addEventListener("open", () => {
+        setWorking("Połączenie gotowe — mów naturalnie", true);
+      });
+      channel.addEventListener("message", (event) => {
+        try { handleRealtimeEvent(JSON.parse(event.data)); } catch (_) {}
+      });
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime/calls", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token.value,
+          "Content-Type": "application/sdp"
+        },
+        body: offer.sdp
+      });
+      if (!sdpResponse.ok) {
+        throw new Error("Nie udało się zestawić połączenia z usługą głosową. Sprawdź dostęp do Realtime API.");
+      }
+      const answerSdp = await sdpResponse.text();
+      await peer.setRemoteDescription({ type: "answer", sdp: answerSdp });
+      realtimeActive = true;
+      realtimeConnecting = false;
+      el.realtimeButton.textContent = "Zakończ rozmowę";
+      el.realtimeButton.dataset.connected = "true";
+      el.realtimeButton.setAttribute("aria-pressed", "true");
+      el.realtimeVoice.disabled = true;
+      el.voiceOutput.checked = false;
+      el.voiceOutput.disabled = true;
+      byId("voice-label").textContent = "LIVE · " + String(token.voice || "marin").toUpperCase();
+      el.micSupport.textContent = "MIKROFON LIVE AKTYWNY";
+      setRealtimeCaption("REALTIME: CONNECTED", true);
+      setBusy(false);
+      setAvatarState("listening");
+      setWorking("Rozmowa na żywo — Cortana słucha", true);
+    } catch (error) {
+      cleanupRealtime();
+      showError(error instanceof Error ? error.message : "Nie udało się uruchomić rozmowy na żywo.");
+    }
+  }
+
   async function sendText(rawText) {
     const text = (rawText || "").trim();
     if (!text || busy) return;
@@ -224,6 +414,17 @@
     }
     el.micSupport.textContent = "Mikrofon: wymaga zgody";
   }
+  el.realtimeButton.addEventListener("click", () => {
+    if (realtimeActive) {
+      cleanupRealtime();
+      return;
+    }
+    startRealtime();
+  });
+  el.realtimeVoice.addEventListener("change", () => {
+    const voice = el.realtimeVoice.value;
+    byId("voice-label").textContent = "VOICE · " + voice.toUpperCase();
+  });
   el.form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const text = el.input.value;
@@ -247,7 +448,8 @@
     else startRecording();
   });
   el.clear.addEventListener("click", async () => {
-    if (busy) return;
+    if (busy && !realtimeActive) return;
+    if (realtimeActive || realtimeConnecting) cleanupRealtime();
     if (recording) stopRecording();
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     try {
@@ -277,4 +479,6 @@
   }).then(() => {el.connection.textContent = "SYSTEM ONLINE";})
     .catch(() => {el.connection.textContent = "API OFFLINE";showError("Nie można połączyć się z serwerem Cortany.");});
   setAvatarState("idle");
+  el.realtimeButton.dataset.connected = "false";
+  el.realtimeVoice.value = "marin";
 })();

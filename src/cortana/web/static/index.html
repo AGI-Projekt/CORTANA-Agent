@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#07141e">
 <meta name="description" content="Lokalny prototyp głosowej Cortany z animowanym awatarem.">
 <title>Cortana · Voice Interface</title>
-<link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+<link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script><script type="module" src="/static/avatar3d.js"></script>
 </head>
 <body>
 <div class="background-grid" aria-hidden="true"></div>
@@ -23,6 +23,7 @@
     <div class="orbital orbit-a"></div><div class="orbital orbit-b"></div><div class="orbital orbit-c"></div>
     <div class="scanline"></div>
     <div class="avatar" id="avatar" data-state="idle" role="img" aria-label="Holograficzny awatar Cortany">
+    <div id="avatar3d" class="avatar3d" aria-hidden="true"></div>
     <svg viewBox="0 0 300 330" class="avatar-svg" aria-hidden="true">
       <defs>
         <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2ffff"/><stop offset=".36" stop-color="#51dfff"/><stop offset="1" stop-color="#3474c8"/></linearGradient>
@@ -52,7 +53,7 @@
     <div><small>RESPONSE</small><strong id="latency-label">WAITING</strong></div>
     <div><small>MEMORY</small><strong>SESSION ONLY</strong></div>
   </div>
-  <p class="disclosure">Głos jest syntetyzowany przez przeglądarkę; barwa zależy od urządzenia i dostępnych głosów. Mikrofon uruchamia się wyłącznie po kliknięciu.</p>
+  <p class="disclosure">Tryb na żywo przesyła dźwięk do modelu głosowego przez WebRTC; mikrofon uruchamia się wyłącznie po kliknięciu i zgodzie. Głos AI jest syntetyczny.</p>
 </section>
 <section class="conversation-panel panel" aria-label="Rozmowa z Cortaną">
   <div class="panel-kicker"><span>02 / CONVERSATION</span><span id="session-label">SESSION ACTIVE</span></div>
@@ -72,11 +73,15 @@
   </form>
   <div class="composer-footer">
     <label class="toggle-label"><input id="voice-output-toggle" type="checkbox" checked><span class="toggle"></span><span>Mów odpowiedzi</span></label>
-    <span id="mic-support" class="footnote">Mikrofon: wymaga zgody</span><span class="footnote">API KEY: SERVER-SIDE</span>
+    <span id="mic-support" class="footnote">Mikrofon: wymaga zgody</span>
+    <label class="live-voice-label" for="realtime-voice-select">GŁOS <select id="realtime-voice-select" class="voice-select"><option value="marin" selected>Marin</option><option value="cedar">Cedar</option><option value="alloy">Alloy</option><option value="ash">Ash</option><option value="ballad">Ballad</option><option value="coral">Coral</option><option value="echo">Echo</option><option value="sage">Sage</option><option value="shimmer">Shimmer</option><option value="verse">Verse</option></select></label>
+    <button id="realtime-button" class="realtime-button" type="button" aria-pressed="false">Połącz głos na żywo</button>
+    <span id="realtime-caption" class="footnote">REALTIME: OFF</span><span class="footnote">AI VOICE · SERVER KEY</span>
+    <audio id="realtime-audio" autoplay playsinline></audio>
   </div>
   <div id="error-banner" class="error-banner" role="alert" hidden></div>
 </section>
 </main>
-<footer class="footer"><span>LILITH CORTANA NEBIRU</span><span>VOICE + AVATAR PROTOTYPE / 0.3</span><span>LOCAL-FIRST UI</span></footer>
+<footer class="footer"><span>LILITH CORTANA NEBIRU</span><span>REALTIME VOICE + 3D AVATAR / 0.4</span><span>LOCAL-FIRST UI</span></footer>
 </body>
 </html>

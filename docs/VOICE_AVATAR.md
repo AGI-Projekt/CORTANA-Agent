@@ -37,6 +37,23 @@ For an offline text-only UI set CORTANA_OFFLINE=1. Transcription still needs cre
 Before non-local deployment, add authentication, rate limiting, HTTPS, deployment configuration, safe logging, quotas, and a reviewed retention policy. The default server binds to loopback. Browser microphone capture usually requires localhost or a secure context such as HTTPS.
 
 
+## Realtime voice and 3D presentation
+
+Use the button marked “Połącz głos na żywo” to initiate a direct Realtime WebRTC session. The server creates a short-lived client secret using the permanent API key; that permanent key never enters browser code. The browser requests microphone permission only after the click and sends audio to the Realtime session. Press “Zakończ rozmowę” to close the peer connection and stop the microphone tracks.
+
+Configuration is server-side:
+
+- CORTANA_REALTIME_MODEL (default gpt-realtime-2.1)
+- CORTANA_REALTIME_VOICE (default marin)
+- CORTANA_REALTIME_TRANSCRIPTION_MODEL (default gpt-4o-mini-transcribe)
+
+The browser voice chooser allows a supported voice per new session. The voice is fixed after the live session starts. The model is instructed to speak Polish, and input transcription is configured for Polish. The live Realtime session has no tools and is separate from the regular CortanaAgent text path; it does not currently invoke the Emotion Core adapter or the agent's in-process text history.
+
+The 3D prototype uses Three.js from a version-pinned CDN import. A 2D SVG fallback remains visible if WebGL initialization fails. Animations represent operational states; the current mouth movement is approximate and is not phoneme/viseme-accurate lip sync.
+
+Important: the Realtime service is metered and requires access to the configured model. The local offline demo does not provide live audio. Do not expose the local server publicly without authentication, rate limiting, and deployment hardening. Live voice is an AI-generated voice, not a human recording.
+
+
 ## Response-style visualization
 
 The avatar can display one of four coarse presentation cues: neutral, supportive, exploratory, or upbeat. The API emits a non-neutral cue only when the core explicitly marks tone adjustment as allowed. The cue describes response presentation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, or disabled estimates fall back to neutral. The cue is local UI state and is not stored as a persistent user profile.
