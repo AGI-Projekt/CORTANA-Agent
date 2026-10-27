@@ -135,6 +135,16 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
     );
     root.add(particles);
 
+    const emotionProfiles = {
+      calm: { label: "SPOKÓJ", color: 0x78efff, eyeX: 0.17, eyeY: 0.09, mouthX: 0.14, mouthY: 0.025, mouthYPos: -0.38, headTilt: 0, headPitch: 0, idleGlow: 4.5 },
+      joy: { label: "RADOŚĆ", color: 0x62ffd5, eyeX: 0.17, eyeY: 0.082, mouthX: 0.18, mouthY: 0.038, mouthYPos: -0.38, headTilt: -0.045, headPitch: -0.018, idleGlow: 5.2 },
+      sadness: { label: "SMUTEK", color: 0x739dff, eyeX: 0.16, eyeY: 0.058, mouthX: 0.12, mouthY: 0.016, mouthYPos: -0.395, headTilt: 0.035, headPitch: 0.045, idleGlow: 3.6 },
+      anger: { label: "ZŁOŚĆ", color: 0xff536b, eyeX: 0.19, eyeY: 0.062, mouthX: 0.13, mouthY: 0.035, mouthYPos: -0.38, headTilt: 0, headPitch: 0.035, idleGlow: 5.8 },
+      fear: { label: "STRACH", color: 0xb68dff, eyeX: 0.16, eyeY: 0.13, mouthX: 0.11, mouthY: 0.06, mouthYPos: -0.39, headTilt: -0.025, headPitch: -0.055, idleGlow: 5.0 },
+      surprise: { label: "ZASKOCZENIE", color: 0x5bf2ff, eyeX: 0.17, eyeY: 0.145, mouthX: 0.105, mouthY: 0.07, mouthYPos: -0.395, headTilt: 0, headPitch: -0.035, idleGlow: 5.6 },
+      disgust: { label: "ODRAZA", color: 0x9dd779, eyeX: 0.16, eyeY: 0.058, mouthX: 0.11, mouthY: 0.022, mouthYPos: -0.365, headTilt: 0.065, headPitch: 0.015, idleGlow: 3.8 },
+      determination: { label: "DETERMINACJA", color: 0xffc45f, eyeX: 0.17, eyeY: 0.06, mouthX: 0.15, mouthY: 0.018, mouthYPos: -0.38, headTilt: 0, headPitch: 0.012, idleGlow: 5.0 }
+    };
     let lastState = "idle";
     let activeViseme = "neutral";
     window.addEventListener("cortana:viseme", (event) => {
@@ -166,7 +176,13 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
       root.position.y = -0.12 + Math.sin(elapsed * 0.8) * 0.035;
       root.rotation.y = Math.sin(elapsed * 0.38) * 0.05;
       headRig.rotation.y = Math.sin(elapsed * 0.68) * 0.065;
-      headRig.rotation.x = Math.sin(elapsed * 0.57) * 0.02;
+      const emotionProfile = emotionProfiles[wrapper.dataset.emotion] || emotionProfiles.calm;
+      headRig.rotation.x = Math.sin(elapsed * 0.57) * 0.02 + emotionProfile.headPitch;
+      headRig.rotation.z = emotionProfile.headTilt;
+      ringMaterial.color.setHex(emotionProfile.color);
+      faceLight.color.setHex(emotionProfile.color);
+      rimLight.color.setHex(emotionProfile.color);
+      irisMaterial.emissive.setHex(emotionProfile.color);
       orbitA.rotation.z = elapsed * 0.1;
       orbitB.rotation.y = 0.32 + elapsed * 0.075;
       orbitC.rotation.z = 0.4 - elapsed * 0.06;
@@ -186,12 +202,15 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
         closed: [0.12, 0.009, -0.383],
         teeth: [0.145, 0.029, -0.384]
       };
-      const profile = visemeProfiles[activeViseme] || visemeProfiles.neutral;
+      const visemeProfile = visemeProfiles[activeViseme] || visemeProfiles.neutral;
       const audioBoost = liveAudioDriven ? mouthDrive * (activeViseme === "closed" ? 0.006 : 0.022) : 0;
       const blend = 0.28;
-      mouth.scale.x += (profile[0] - mouth.scale.x) * blend;
-      mouth.scale.y += (profile[1] + audioBoost - mouth.scale.y) * blend;
-      mouth.position.y += (profile[2] - mouth.position.y) * blend;
+      const targetMouthX = speaking ? visemeProfile[0] : emotionProfile.mouthX;
+      const targetMouthY = speaking ? visemeProfile[1] + audioBoost : emotionProfile.mouthY;
+      const targetMouthYPos = speaking ? visemeProfile[2] : emotionProfile.mouthYPos;
+      mouth.scale.x += (targetMouthX - mouth.scale.x) * blend;
+      mouth.scale.y += (targetMouthY - mouth.scale.y) * blend;
+      mouth.position.y += (targetMouthYPos - mouth.position.y) * blend;
       lipHighlight.scale.x += ((activeViseme === "wide" ? 1.14 : activeViseme === "round" ? 0.64 : 1) - lipHighlight.scale.x) * blend;
 
       // Procedural blink with a short close/open envelope; restore eye scale after each blink.
@@ -203,8 +222,10 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
       const blink = blinkElapsed >= 0 && blinkElapsed < 0.17
         ? Math.sin((blinkElapsed / 0.17) * Math.PI)
         : 0;
-      eyeLeft.scale.y = 0.09 * (1 - blink * 0.94);
-      eyeRight.scale.y = 0.09 * (1 - blink * 0.94);
+      eyeLeft.scale.x = emotionProfile.eyeX;
+      eyeRight.scale.x = emotionProfile.eyeX;
+      eyeLeft.scale.y = emotionProfile.eyeY * (1 - blink * 0.94);
+      eyeRight.scale.y = emotionProfile.eyeY * (1 - blink * 0.94);
       if (listening) {
         ringMaterial.opacity = 0.65;
         faceLight.intensity = 5.2;
@@ -213,7 +234,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
         faceLight.intensity = 6.4;
       } else {
         ringMaterial.opacity = 0.46;
-        faceLight.intensity = 4.5;
+        faceLight.intensity = emotionProfile.idleGlow;
       }
       if (state !== lastState) {
         wrapper.setAttribute("aria-label", "Awatar Cortany, stan: " + (labelsForState(state)));
