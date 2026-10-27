@@ -62,3 +62,19 @@ def test_realtime_emotion_disabled_returns_calm_expression():
     )
     assert response.status_code == 200
     assert response.json()["avatar_expression"] == "calm"
+
+
+def test_procedural_avatar_contains_all_eight_visual_profiles():
+    from pathlib import Path
+    import cortana.web.app as app_module
+
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    avatar_script = (static_dir / "avatar3d.js").read_text(encoding="utf-8")
+    app_script = (static_dir / "app.js").read_text(encoding="utf-8")
+    for expression in (
+        "calm", "joy", "sadness", "anger", "fear", "surprise", "disgust", "determination"
+    ):
+        assert expression + ":" in avatar_script
+        assert expression + ":" in app_script or expression in app_script
+    assert "dataset.emotion" in app_script
+    assert "emotionProfile.headTilt" in avatar_script
