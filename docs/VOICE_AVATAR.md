@@ -56,7 +56,7 @@ Important: the Realtime service is metered and requires access to the configured
 
 ## Response-style visualization
 
-The avatar can display one of four coarse presentation cues: neutral, supportive, exploratory, or upbeat. The API emits a non-neutral cue only when the core explicitly marks tone adjustment as allowed. The cue describes response presentation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, or disabled estimates fall back to neutral. The cue is local UI state and is not stored as a persistent user profile.
+The avatar retains four coarse response-tone cues (neutral, supportive, exploratory, upbeat) and now also has eight local visual expressions: calm, joy, sadness, anger, fear, surprise, disgust, and determination. The server supplies only an allowlisted expression ID after the existing opt-in and confidence gates. The browser uses it to animate eye openness, mouth shape, head tilt, and hologram accent lighting. This describes a temporary presentation animation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, disabled, or unavailable estimates fall back to calm/neutral. Visual state is not stored as a persistent user profile. See docs/LILITH_EMOTION_VISUALS.md.
 
 
 ## Optional Realtime Emotion Core guidance and audit
