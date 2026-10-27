@@ -176,6 +176,10 @@ def create_app(
                 "emotion_status": answer.metadata.get("emotion_status", "disabled"),
                 "tone_adjusted": bool(answer.metadata.get("tone_adjusted", False)),
                 "response_style": _response_style(answer.metadata),
+                "avatar_expression": resolve_visual_expression(
+                    str(answer.metadata.get("emotion_category", "unknown")),
+                    enabled=bool(answer.metadata.get("tone_adjusted", False)),
+                ),
             },
         }
 
