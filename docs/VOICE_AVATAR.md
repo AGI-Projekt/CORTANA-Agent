@@ -56,14 +56,14 @@ Important: the Realtime service is metered and requires access to the configured
 
 ## Response-style visualization
 
-The avatar can display one of four coarse presentation cues: neutral, supportive, exploratory, or upbeat. The API emits a non-neutral cue only when the core explicitly marks tone adjustment as allowed. The cue describes response presentation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, or disabled estimates fall back to neutral. The cue is local UI state and is not stored as a persistent user profile.
+The avatar retains four coarse response-tone cues (neutral, supportive, exploratory, upbeat) and now also has eight local visual expressions: calm, joy, sadness, anger, fear, surprise, disgust, and determination. The server supplies only an allowlisted expression ID after the existing opt-in and confidence gates. The browser uses it to animate eye openness, mouth shape, head tilt, and hologram accent lighting. This describes a temporary presentation animation, not a verified emotion or diagnosis of the user. Missing, low-confidence, unknown, disabled, or unavailable estimates fall back to calm/neutral. Visual state is not stored as a persistent user profile. See docs/LILITH_EMOTION_VISUALS.md.
 
 
 ## Optional Realtime Emotion Core guidance and audit
 
 The realtime transcript-to-style path is opt-in in the browser and off by default. To make Emotion Core 1.3 available on the server, set CORTANA_REALTIME_EMOTION=1 and make its package importable on PYTHONPATH. The user must separately enable the “Dopasuj styl (opcjonalnie)” checkbox before final voice transcripts are sent to the server for analysis.
 
-The server returns only a coarse presentation style (neutral, supportive, exploratory, or upbeat) and a fixed server-authored Realtime instruction hint. Audit records do not retain transcript text. The instruction update is sent over the Realtime data channel and guides subsequent responses; the current spoken response may already be underway when transcription completes. Disabling the checkbox resets the avatar style and requests neutral session instructions.
+The server returns a coarse response style, an allowlisted visual expression ID, and a fixed server-authored Realtime instruction hint. Audit records do not retain transcript text. The instruction update is sent over the Realtime data channel and guides subsequent responses; the current spoken response may already be underway when transcription completes. Disabling the checkbox resets the avatar expression to calm and requests neutral session instructions.
 
 Operational audit records are bounded and in-memory by default. They contain only timestamp, event type, coarse outcome, and duration; no transcript, audio, user/session identifier, inferred category, model output, or API secret. Provider errors and invalid request correlation fall back to neutral presentation.
 

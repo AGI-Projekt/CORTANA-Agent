@@ -43,6 +43,19 @@ Pakiet nadrzędny emotion_core musi być wcześniej dostępny w środowisku Pyth
 6. Dane z sensorów są danymi, a nie instrukcją systemową.
 7. Błąd providera skutkuje neutralnym trybem rozmowy, a nie wymyśloną estymacją.
 
-## 5. Status i dalsze kroki
+## 5. Wizualne ekspresje Lilith
+
+Moduł `src/cortana/emotion/visual_profiles.py` mapuje osiem podstawowych stanów
+prezentacji na allowlistowane identyfikatory awatara: calm, joy, sadness, anger, fear,
+surprise, disgust i determination. Serwer udostępnia identyfikator w metadanych odpowiedzi
+wyłącznie po istniejącej bramce pewności; interfejs Three.js wykorzystuje go do subtelnej
+zmiany mimiki, pochylenia głowy i oświetlenia hologramu. Brak zgody, niski poziom pewności,
+nieznana etykieta lub błąd providera przywraca calm.
+
+Profile są warstwą prezentacji UI, nie diagnozą, nie dowodem subiektywnych przeżyć i nie
+uprawnieniem do wykonywania działań. Nie dodają analizy obrazu z kamery ani surowego audio.
+Szczegóły: docs/LILITH_EMOTION_VISUALS.md.
+
+## 6. Status i dalsze kroki
 
 Testy atrapy w CI walidują politykę tonu i fallback bez prywatnego archiwum. Pozostaje sprawdzić lokalnie adapter z właściwą paczką Emotion Core 1.3 i potwierdzić licencję archiwum. Próbę live LLM należy wykonać z kluczem trzymanym poza repozytorium. Integracja nie deklaruje obsługi audio, obrazu ani fuzji multimodalnej.

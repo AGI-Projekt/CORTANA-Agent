@@ -8,6 +8,7 @@ CORTANA-Agent is a modular conversational agent foundation. It includes a model 
 ## Voice + avatar prototype
 
 - Browser interface with a procedurally generated WebGL/Three.js 3D avatar and states for listening, thinking, speaking, and idle.
+- Eight opt-in, confidence-gated visual expressions for Lilith Cortana Nebiru, with neutral fallback and no permission escalation.
 - Full-duplex Realtime API voice via WebRTC with a short-lived browser credential and selectable voice.
 - Explicit microphone permission and a manual record/stop workflow.
 - Speech transcription with the gpt-transcribe audio model, a 25 MiB request limit, and no local audio-file persistence.

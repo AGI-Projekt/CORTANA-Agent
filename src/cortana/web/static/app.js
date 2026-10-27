@@ -36,6 +36,17 @@
     const label = byId("avatar-tone");
     if (label) label.textContent = toneLabels[safeTone];
   }
+  const emotionLabels = {
+    calm: "SPOKÓJ", joy: "RADOŚĆ", sadness: "SMUTEK", anger: "ZŁOŚĆ",
+    fear: "STRACH", surprise: "ZASKOCZENIE", disgust: "ODRAZA",
+    determination: "DETERMINACJA"
+  };
+  function setAvatarEmotion(emotion) {
+    const safeEmotion = Object.prototype.hasOwnProperty.call(emotionLabels, emotion) ? emotion : "calm";
+    el.avatar.dataset.emotion = safeEmotion;
+    const label = byId("avatar-emotion");
+    if (label) label.textContent = emotionLabels[safeEmotion];
+  }
   function setWorking(text, isBusy) {
     el.workingText.textContent = text;
     el.working.dataset.busy = isBusy ? "true" : "false";
@@ -215,6 +226,7 @@
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error("Emotion hint unavailable");
       setAvatarTone(payload.response_style || "neutral");
+      setAvatarEmotion(payload.avatar_expression || "calm");
       if (el.realtimeEmotionStatus) {
         const states = {
           adjusted: "EMOTION HINTS: ACTIVE",
@@ -234,12 +246,14 @@
       }
     } catch (_) {
       setAvatarTone("neutral");
+      setAvatarEmotion("calm");
       if (el.realtimeEmotionStatus) el.realtimeEmotionStatus.textContent = "EMOTION HINTS: UNAVAILABLE";
     }
   }
 
   async function resetRealtimeEmotion() {
     setAvatarTone("neutral");
+    setAvatarEmotion("calm");
     if (el.realtimeEmotionStatus) el.realtimeEmotionStatus.textContent = "EMOTION HINTS: OFF";
     if (!realtimeChannel || realtimeChannel.readyState !== "open") return;
     try {
@@ -454,6 +468,7 @@
       if (!response.ok) throw new Error(payload.detail || "Nie udało się uzyskać odpowiedzi.");
       addMessage("assistant", payload.text || "Nie otrzymałam tekstowej odpowiedzi.");
       setAvatarTone(payload.metadata && payload.metadata.response_style);
+      setAvatarEmotion(payload.metadata && payload.metadata.avatar_expression);
       el.latency.textContent = Math.round(performance.now() - started) + " MS";
       el.connection.textContent = "SYSTEM ONLINE";
       setWorking("Odpowiedź gotowa", false);
