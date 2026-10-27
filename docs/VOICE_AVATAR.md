@@ -63,7 +63,7 @@ The avatar retains four coarse response-tone cues (neutral, supportive, explorat
 
 The realtime transcript-to-style path is opt-in in the browser and off by default. To make Emotion Core 1.3 available on the server, set CORTANA_REALTIME_EMOTION=1 and make its package importable on PYTHONPATH. The user must separately enable the “Dopasuj styl (opcjonalnie)” checkbox before final voice transcripts are sent to the server for analysis.
 
-The server returns only a coarse presentation style (neutral, supportive, exploratory, or upbeat) and a fixed server-authored Realtime instruction hint. Audit records do not retain transcript text. The instruction update is sent over the Realtime data channel and guides subsequent responses; the current spoken response may already be underway when transcription completes. Disabling the checkbox resets the avatar style and requests neutral session instructions.
+The server returns a coarse response style, an allowlisted visual expression ID, and a fixed server-authored Realtime instruction hint. Audit records do not retain transcript text. The instruction update is sent over the Realtime data channel and guides subsequent responses; the current spoken response may already be underway when transcription completes. Disabling the checkbox resets the avatar expression to calm and requests neutral session instructions.
 
 Operational audit records are bounded and in-memory by default. They contain only timestamp, event type, coarse outcome, and duration; no transcript, audio, user/session identifier, inferred category, model output, or API secret. Provider errors and invalid request correlation fall back to neutral presentation.
 
