@@ -468,6 +468,7 @@
       if (!response.ok) throw new Error(payload.detail || "Nie udało się uzyskać odpowiedzi.");
       addMessage("assistant", payload.text || "Nie otrzymałam tekstowej odpowiedzi.");
       setAvatarTone(payload.metadata && payload.metadata.response_style);
+      setAvatarEmotion(payload.metadata && payload.metadata.avatar_expression);
       el.latency.textContent = Math.round(performance.now() - started) + " MS";
       el.connection.textContent = "SYSTEM ONLINE";
       setWorking("Odpowiedź gotowa", false);
