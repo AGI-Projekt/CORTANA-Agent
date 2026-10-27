@@ -292,7 +292,7 @@ def create_app(
                     "emotion_category": estimate.category.value,
                 })
                 expression = resolve_visual_expression(estimate.category, enabled=allowed)
-                outcome = "adjusted" if style != "neutral" else "neutral"
+                outcome = "adjusted" if style != "neutral" or expression != "calm" else "neutral"
         except Exception:
             outcome, style, expression = "unavailable", "neutral", "calm"
 
