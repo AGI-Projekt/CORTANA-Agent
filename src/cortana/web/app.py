@@ -14,6 +14,7 @@ from cortana.audio import OpenAIAudioProvider
 from cortana.audio.openai_audio import MAX_AUDIO_BYTES, SUPPORTED_AUDIO_SUFFIXES
 from cortana.core import AgentRequest, CortanaAgent, EchoModel
 from cortana.emotion.contracts import EmotionEstimate, EmotionModality, EmotionProvider, EmotionRequest
+from cortana.emotion.visual_profiles import resolve_visual_expression
 from cortana.llm import OpenAIResponsesModel
 from cortana.observability import PrivacyAuditLog
 from cortana.voice import RealtimeSessionProvider
@@ -249,6 +250,7 @@ def create_app(
             return {
                 "status": "disabled",
                 "response_style": "neutral",
+                "avatar_expression": "calm",
                 "instructions": _realtime_instructions("neutral"),
             }
         transcript = (payload.transcript or "").strip()
@@ -262,6 +264,7 @@ def create_app(
             return {
                 "status": provider_status,
                 "response_style": "neutral",
+                "avatar_expression": "calm",
                 "instructions": _realtime_instructions("neutral"),
             }
 
@@ -277,20 +280,23 @@ def create_app(
                 )
             )
             if not isinstance(estimate, EmotionEstimate) or estimate.request_id != request_id:
-                outcome, style = "invalid_response", "neutral"
+                outcome, style, expression = "invalid_response", "neutral", "calm"
             else:
+                allowed = estimate.may_adjust_tone
                 style = _response_style({
-                    "tone_adjusted": estimate.may_adjust_tone,
+                    "tone_adjusted": allowed,
                     "emotion_category": estimate.category.value,
                 })
+                expression = resolve_visual_expression(estimate.category, enabled=allowed)
                 outcome = "adjusted" if style != "neutral" else "neutral"
         except Exception:
-            outcome, style = "unavailable", "neutral"
+            outcome, style, expression = "unavailable", "neutral", "calm"
 
         privacy_audit.record("realtime_emotion", outcome, duration_ms=int((perf_counter() - started) * 1000))
         return {
             "status": outcome,
             "response_style": style,
+            "avatar_expression": expression,
             "instructions": _realtime_instructions(style),
         }
 
