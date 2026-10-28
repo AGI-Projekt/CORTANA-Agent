@@ -75,3 +75,16 @@ test("invalid AudioContext input is rejected", () => {
   const h = harness({});
   assert.throws(() => h.clock.capturePlaybackAnchor(null), /AudioContext/);
 });
+
+
+test("scheduleAudioAlignedTimeline delegates audio-clock events with captured anchor", () => {
+  const h = harness({ timestamp: { contextTime: 3.5, performanceTime: 6500 }, currentTime: 3.6 });
+  const scheduler = { playAudioAlignedTimeline(events, anchor) {
+    return { scheduled: events.length, anchorTimeMs: anchor.anchorTimeMs, contextTimeSeconds: anchor.contextTimeSeconds };
+  }};
+  assert.throws(() => h.clock.scheduleAudioAlignedTimeline(scheduler, []), /No audio playout anchor/);
+  h.clock.markOutputStart(h.context);
+  const result = h.clock.scheduleAudioAlignedTimeline(scheduler, [{audioTimeSeconds:3.6}]);
+  assert.equal(result.anchorTimeMs, 6500);
+  assert.equal(result.contextTimeSeconds, 3.5);
+});
