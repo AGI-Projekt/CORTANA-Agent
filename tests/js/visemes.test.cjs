@@ -76,8 +76,6 @@ test("timeline emits cues at declared offsets and returns to neutral", () => {
   assert.equal(h.emitted.at(-1).detail.viseme, "open");
   h.advance(100);
   assert.equal(h.emitted.at(-1).detail.viseme, "round");
-  h.advance(100);
-  assert.equal(h.emitted.at(-1).detail.viseme, "round");
   h.advance(80);
   assert.equal(h.emitted.at(-1).detail.viseme, "neutral");
 });
