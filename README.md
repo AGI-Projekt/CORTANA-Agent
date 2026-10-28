@@ -9,7 +9,7 @@ CORTANA-Agent is a modular conversational agent foundation. It includes a model 
 
 - Browser interface with a procedurally generated WebGL/Three.js 3D avatar and states for listening, thinking, speaking, and idle.
 - Eight opt-in, confidence-gated visual expressions for Lilith Cortana Nebiru, with neutral fallback and no permission escalation.
-- Emotion Core v1.2 adds frame-rate-independent facial transitions, procedural upper-body gestures, and bounded voice-activity synchronization; the v1.1 facial/hologram lighting behavior is retained.
+- Emotion Core v1.3 adds timestamped gesture sequences and an integration event for provider-supplied audio-aligned viseme timelines; v1.2 full-body animation and voice-activity synchronization are retained.
 - Full-duplex Realtime API voice via WebRTC with a short-lived browser credential and selectable voice.
 - Explicit microphone permission and a manual record/stop workflow.
 - Speech transcription with the gpt-transcribe audio model, a 25 MiB request limit, and no local audio-file persistence.
@@ -69,7 +69,7 @@ Never commit API keys or put them in the browser. The live voice endpoint return
 - Tool registry with explicit allowlist.
 - Structured self-improvement proposals requiring review and tests.
 
-See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, and docs/SELF_IMPROVEMENT.md.
+See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, and docs/SELF_IMPROVEMENT.md.
 
 
 ## Viseme timing API

@@ -162,6 +162,20 @@ import "./emotion-animation.js";
     });
     let lastState = "idle";
     let activeViseme = "neutral";
+    let sequencedGesture = { armLift: 0, armOpen: 0, wristTurn: 0, intensity: 0 };
+    window.addEventListener("cortana:gesture-frame", (event) => {
+      const detail = event && event.detail;
+      if (!detail) return;
+      const values = ["armLift", "armOpen", "wristTurn", "intensity"];
+      if (values.every((key) => Number.isFinite(detail[key]))) {
+        sequencedGesture = {
+          armLift: THREE.MathUtils.clamp(detail.armLift, -0.6, 0.8),
+          armOpen: THREE.MathUtils.clamp(detail.armOpen, -0.6, 0.8),
+          wristTurn: THREE.MathUtils.clamp(detail.wristTurn, -0.5, 0.5),
+          intensity: THREE.MathUtils.clamp(detail.intensity, 0, 1)
+        };
+      }
+    });
     window.addEventListener("cortana:viseme", (event) => {
       const name = event && event.detail && event.detail.viseme;
       if (["neutral", "open", "mid", "wide", "round", "closed", "teeth"].includes(name)) {
@@ -212,12 +226,12 @@ import "./emotion-animation.js";
       // the baseline pose. The envelopes are smooth and bounded to avoid abrupt snaps.
       const voicePulse = speaking ? emotionProfile.voiceActivity * 0.22 : 0;
       const gestureWave = Math.sin(elapsed * (speaking ? 3.1 : 0.75));
-      const armLift = emotionProfile.armLift + voicePulse * (0.65 + 0.35 * gestureWave);
-      const armOpen = emotionProfile.armOpen + voicePulse * 0.32;
+      const armLift = emotionProfile.armLift + voicePulse * (0.65 + 0.35 * gestureWave) + sequencedGesture.armLift;
+      const armOpen = emotionProfile.armOpen + voicePulse * 0.32 + sequencedGesture.armOpen;
       leftArm.rotation.z += ((armLift + armOpen + Math.sin(elapsed * 1.3) * emotionProfile.gesturePulse * 0.15) - leftArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
       rightArm.rotation.z += ((-armLift - armOpen + Math.sin(elapsed * 1.3 + 0.6) * emotionProfile.gesturePulse * 0.15) - rightArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
-      leftArm.rotation.x += ((emotionProfile.wristTurn + voicePulse * 0.12) - leftArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
-      rightArm.rotation.x += ((-emotionProfile.wristTurn - voicePulse * 0.12) - rightArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
+      leftArm.rotation.x += ((emotionProfile.wristTurn + voicePulse * 0.12 + sequencedGesture.wristTurn) - leftArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
+      rightArm.rotation.x += ((-emotionProfile.wristTurn - voicePulse * 0.12 - sequencedGesture.wristTurn * sequenceBlend) - rightArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
       ringMaterial.color.setHex(emotionProfile.color);
       orbitB.material.color.setHex(emotionProfile.color);
       orbitC.material.color.setHex(emotionProfile.color);

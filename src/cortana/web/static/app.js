@@ -50,6 +50,27 @@
     const label = byId("avatar-emotion");
     if (label) label.textContent = emotionLabels[safeEmotion];
   }
+  // Integration point for providers that supply real audio-aligned viseme timestamps.
+  // No grapheme-derived estimates are relabeled as acoustic timestamps.
+  window.addEventListener("cortana:audio-aligned-visemes", (event) => {
+    const detail = event && event.detail;
+    if (!detail || !Array.isArray(detail.events) || !window.CortanaVisemeScheduler) return;
+    try {
+      const anchor = Number.isFinite(detail.anchorTimeMs)
+        ? detail.anchorTimeMs
+        : (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor()
+          ? window.CortanaAudioClock.getLatestAnchor().anchorTimeMs : undefined);
+      const result = window.CortanaVisemeScheduler.playTimeline(detail.events, anchor);
+      window.dispatchEvent(new CustomEvent("cortana:viseme-timeline-result", {
+        detail: { accepted: true, scheduled: result.scheduled, source: "audio-aligned-provider" }
+      }));
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent("cortana:viseme-timeline-result", {
+        detail: { accepted: false, reason: error instanceof Error ? error.message : "invalid timeline" }
+      }));
+    }
+  });
+
   function setWorking(text, isBusy) {
     el.workingText.textContent = text;
     el.working.dataset.busy = isBusy ? "true" : "false";
