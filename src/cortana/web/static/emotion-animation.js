@@ -1,5 +1,5 @@
 /* Emotion-to-Animation Engine v1.1
- * Frame-rate-independent interpolation for temporary avatar presentation state.
+ * Frame-rate-independent facial, full-body gesture, and voice-activity animation.
  * No emotion inference, persistence, or permission changes occur in this module.
  */
 (() => {
@@ -16,9 +16,20 @@
     determination: Object.freeze({ label: "DETERMINACJA", color: 0xffc45f, eyeX: 0.17, eyeY: 0.06, mouthX: 0.15, mouthY: 0.018, mouthYPos: -0.38, headTilt: 0, headPitch: 0.012, bodySway: 0.007, breath: 0.012, idleGlow: 5.0, blinkInterval: 4.1 })
   });
 
+  const GESTURES = Object.freeze({
+    calm: Object.freeze({ armLift: 0.02, armOpen: 0.16, wristTurn: 0.02, gesturePulse: 0.08 }),
+    joy: Object.freeze({ armLift: 0.42, armOpen: 0.48, wristTurn: 0.18, gesturePulse: 0.28 }),
+    sadness: Object.freeze({ armLift: -0.12, armOpen: 0.04, wristTurn: -0.12, gesturePulse: 0.03 }),
+    anger: Object.freeze({ armLift: 0.12, armOpen: 0.12, wristTurn: -0.3, gesturePulse: 0.16 }),
+    fear: Object.freeze({ armLift: 0.28, armOpen: -0.1, wristTurn: 0.24, gesturePulse: 0.2 }),
+    surprise: Object.freeze({ armLift: 0.52, armOpen: 0.58, wristTurn: 0.3, gesturePulse: 0.24 }),
+    disgust: Object.freeze({ armLift: -0.04, armOpen: -0.12, wristTurn: -0.22, gesturePulse: 0.05 }),
+    determination: Object.freeze({ armLift: 0.16, armOpen: 0.08, wristTurn: 0.08, gesturePulse: 0.09 })
+  });
   const NUMERIC_KEYS = Object.freeze([
     "eyeX", "eyeY", "mouthX", "mouthY", "mouthYPos", "headTilt",
-    "headPitch", "bodySway", "breath", "idleGlow", "blinkInterval"
+    "headPitch", "bodySway", "breath", "idleGlow", "blinkInterval",
+    "armLift", "armOpen", "wristTurn", "gesturePulse"
   ]);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const lerp = (from, to, amount) => from + (to - from) * amount;
@@ -36,8 +47,10 @@
     const transitionSeconds = clamp(Number(options.transitionSeconds) || 0.42, 0.08, 2.5);
     let currentId = "calm";
     let targetId = "calm";
-    let current = { ...PROFILES.calm };
-    let target = PROFILES.calm;
+    let current = { ...PROFILES.calm, ...GESTURES.calm };
+    let target = { ...PROFILES.calm, ...GESTURES.calm };
+    let voiceActivity = 0;
+    let voiceSpeaking = false;
     let transitionCount = 0;
 
     function setEmotion(id) {
@@ -45,7 +58,7 @@
         ? id : "calm";
       if (nextId === targetId) return { changed: false, emotion: targetId };
       targetId = nextId;
-      target = PROFILES[nextId];
+      target = { ...PROFILES[nextId], ...GESTURES[nextId] };
       transitionCount += 1;
       return { changed: true, emotion: targetId, transition: transitionCount };
     }
@@ -55,6 +68,8 @@
       const alpha = 1 - Math.exp(-Math.LN2 * dt / (transitionSeconds / 3));
       for (const key of NUMERIC_KEYS) current[key] = lerp(current[key], target[key], alpha);
       current.color = mixColor(current.color, target.color, alpha);
+      current.voiceActivity = voiceActivity;
+      current.voiceSpeaking = voiceSpeaking;
       if (Math.abs(current.headTilt - target.headTilt) < 0.0001 &&
           Math.abs(current.headPitch - target.headPitch) < 0.0001 &&
           Math.abs(current.eyeY - target.eyeY) < 0.0001) {
@@ -65,24 +80,32 @@
 
     function reset() {
       targetId = "calm";
-      target = PROFILES.calm;
+      target = { ...PROFILES.calm, ...GESTURES.calm };
       currentId = "calm";
-      current = { ...PROFILES.calm };
+      current = { ...PROFILES.calm, ...GESTURES.calm };
+      voiceActivity = 0;
+      voiceSpeaking = false;
       transitionCount = 0;
       return update(0);
     }
 
     return Object.freeze({
       setEmotion,
+      setVoiceActivity(level, speaking) {
+        voiceActivity = clamp(Number.isFinite(level) ? level : 0, 0, 1);
+        voiceSpeaking = speaking === true;
+        return { level: voiceActivity, speaking: voiceSpeaking };
+      },
       update,
       reset,
       getEmotion: () => targetId,
-      getProfiles: () => PROFILES
+      getProfiles: () => PROFILES,
+      getGestureProfiles: () => GESTURES
     });
   }
 
   window.CortanaEmotionAnimation = Object.freeze({
-    version: "1.1.0",
+    version: "1.2.0",
     profiles: PROFILES,
     createEmotionAnimationEngine
   });

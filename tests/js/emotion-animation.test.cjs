@@ -13,7 +13,7 @@ function createHarness() {
 
 test("engine exposes eight immutable allowlisted profiles", () => {
   const api = createHarness();
-  assert.equal(api.version, "1.1.0");
+  assert.equal(api.version, "1.2.0");
   assert.deepEqual(Object.keys(api.profiles).sort(), [
     "anger", "calm", "determination", "disgust", "fear", "joy", "sadness", "surprise"
   ]);
@@ -63,4 +63,21 @@ test("reset restores the exact calm baseline", () => {
   assert.equal(state.emotion, "calm");
   assert.equal(state.color, engine.getProfiles().calm.color);
   assert.equal(state.eyeY, engine.getProfiles().calm.eyeY);
+});
+
+
+test("full-body gesture profiles are allowlisted and voice activity is bounded", () => {
+  const api = createHarness();
+  const engine = api.createEmotionAnimationEngine();
+  const gestures = engine.getGestureProfiles();
+  assert.deepEqual(Object.keys(gestures).sort(), Object.keys(api.profiles).sort());
+  assert.equal(Object.isFrozen(gestures), true);
+  assert.equal(engine.setVoiceActivity(2, true).level, 1);
+  assert.equal(engine.setVoiceActivity(-1, false).level, 0);
+  engine.setEmotion("joy");
+  let state;
+  for (let i = 0; i < 180; i += 1) state = engine.update(1 / 60);
+  assert.ok(state.armLift > 0.3);
+  assert.equal(state.voiceActivity, 0);
+  assert.equal(state.voiceSpeaking, false);
 });

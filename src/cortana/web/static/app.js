@@ -99,20 +99,28 @@
       utterance.pitch = 1.02;
       utterance.onstart = () => {
         setAvatarState("speaking");
+        el.avatar.dataset.mouthOpen = "0.18";
+        window.dispatchEvent(new CustomEvent("cortana:voice-state", { detail: { speaking: true, source: "speech-synthesis" } }));
         el.latency.textContent = "VOICE OUTPUT";
       };
       utterance.onboundary = () => {
         voiceCounter += 1;
+        el.avatar.dataset.mouthOpen = voiceCounter % 2 ? "0.48" : "0.2";
+        window.dispatchEvent(new CustomEvent("cortana:voice-state", { detail: { speaking: true, source: "speech-synthesis", boundary: voiceCounter } }));
         const mouth = document.getElementById("mouth");
         if (mouth) mouth.style.transform = voiceCounter % 2 ? "scaleY(2.5)" : "scaleY(1)";
       };
       utterance.onend = () => {
+        el.avatar.dataset.mouthOpen = "0";
+        window.dispatchEvent(new CustomEvent("cortana:voice-state", { detail: { speaking: false, source: "speech-synthesis" } }));
         const mouth = document.getElementById("mouth");
         if (mouth) mouth.style.transform = "";
         setAvatarState("idle");
         resolve();
       };
       utterance.onerror = () => {
+        el.avatar.dataset.mouthOpen = "0";
+        window.dispatchEvent(new CustomEvent("cortana:voice-state", { detail: { speaking: false, source: "speech-synthesis" } }));
         setAvatarState("idle");
         resolve();
       };
