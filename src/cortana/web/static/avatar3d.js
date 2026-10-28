@@ -76,6 +76,23 @@ import "./emotion-animation.js";
     }
     const torso = ellipsoid(root, skinMaterial, [0, -1.25, -0.02], [1.38, 0.78, 0.54]);
     ellipsoid(root, hairMaterial, [0, -1.35, -0.15], [1.22, 0.65, 0.57]);
+
+    // Lightweight procedural arm rigs: shoulder, forearm and hand remain parented
+    // to the torso root, so they work without a downloaded skeletal model.
+    function createArm(side) {
+      const rig = new THREE.Group();
+      rig.position.set(side * 1.02, -0.82, 0.02);
+      root.add(rig);
+      ellipsoid(rig, skinMaterial, [side * 0.04, -0.28, 0], [0.2, 0.42, 0.2], 24);
+      ellipsoid(rig, hairMaterial, [side * 0.06, -0.7, 0.035], [0.15, 0.34, 0.16], 24);
+      ellipsoid(rig, skinMaterial, [side * 0.07, -1.02, 0.08], [0.17, 0.19, 0.14], 20);
+      for (let finger = 0; finger < 3; finger += 1) {
+        ellipsoid(rig, skinMaterial, [side * (0.02 + finger * 0.07), -1.18, 0.1], [0.035, 0.1, 0.04], 12);
+      }
+      return rig;
+    }
+    const leftArm = createArm(-1);
+    const rightArm = createArm(1);
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.31, 0.76, 24), skinMaterial);
     neck.position.set(0, -0.48, 0.01);
     root.add(neck);
@@ -166,6 +183,10 @@ import "./emotion-animation.js";
     window.addEventListener("resize", resize);
     resize();
 
+    function blendFactor(deltaSeconds, timeConstant) {
+      return 1 - Math.exp(-Math.LN2 * Math.max(0, deltaSeconds) / timeConstant);
+    }
+
     function animate() {
       const elapsed = clock.getElapsedTime();
       const nowMs = performance.now();
@@ -173,10 +194,12 @@ import "./emotion-animation.js";
       previousFrameTime = nowMs;
       const requestedEmotion = wrapper.dataset.emotion || "calm";
       if (requestedEmotion !== emotionEngine.getEmotion()) emotionEngine.setEmotion(requestedEmotion);
-      currentEmotionProfile = emotionEngine.update(deltaSeconds);
       const state = wrapper.dataset.state || "idle";
       const speaking = state === "speaking";
       const listening = state === "listening";
+      const voiceLevel = Math.max(0, Math.min(1, Number(wrapper.dataset.mouthOpen || "0")));
+      emotionEngine.setVoiceActivity(voiceLevel, speaking);
+      currentEmotionProfile = emotionEngine.update(deltaSeconds);
       root.position.y = -0.12 + Math.sin(elapsed * 0.8) * 0.035;
       root.rotation.y = Math.sin(elapsed * 0.38) * 0.05;
       headRig.rotation.y = Math.sin(elapsed * 0.68) * 0.065;
@@ -185,6 +208,16 @@ import "./emotion-animation.js";
       headRig.rotation.z = Math.sin(elapsed * 0.42) * 0.008 + emotionProfile.headTilt;
       root.rotation.z = Math.sin(elapsed * 0.62) * emotionProfile.bodySway;
       torso.scale.y = 0.78 * (1 + Math.sin(elapsed * 1.65) * emotionProfile.breath);
+      // Voice amplitude adds a restrained conversational gesture; emotion supplies
+      // the baseline pose. The envelopes are smooth and bounded to avoid abrupt snaps.
+      const voicePulse = speaking ? emotionProfile.voiceActivity * 0.22 : 0;
+      const gestureWave = Math.sin(elapsed * (speaking ? 3.1 : 0.75));
+      const armLift = emotionProfile.armLift + voicePulse * (0.65 + 0.35 * gestureWave);
+      const armOpen = emotionProfile.armOpen + voicePulse * 0.32;
+      leftArm.rotation.z += ((armLift + armOpen + Math.sin(elapsed * 1.3) * emotionProfile.gesturePulse * 0.15) - leftArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
+      rightArm.rotation.z += ((-armLift - armOpen + Math.sin(elapsed * 1.3 + 0.6) * emotionProfile.gesturePulse * 0.15) - rightArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
+      leftArm.rotation.x += ((emotionProfile.wristTurn + voicePulse * 0.12) - leftArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
+      rightArm.rotation.x += ((-emotionProfile.wristTurn - voicePulse * 0.12) - rightArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
       ringMaterial.color.setHex(emotionProfile.color);
       orbitB.material.color.setHex(emotionProfile.color);
       orbitC.material.color.setHex(emotionProfile.color);
