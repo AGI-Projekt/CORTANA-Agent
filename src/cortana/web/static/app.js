@@ -54,13 +54,21 @@
   // No grapheme-derived estimates are relabeled as acoustic timestamps.
   window.addEventListener("cortana:audio-aligned-visemes", (event) => {
     const detail = event && event.detail;
-    if (!detail || !Array.isArray(detail.events) || !window.CortanaVisemeScheduler) return;
+    if (!detail || !window.CortanaVisemeScheduler) return;
     try {
-      const anchor = Number.isFinite(detail.anchorTimeMs)
-        ? detail.anchorTimeMs
-        : (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor()
-          ? window.CortanaAudioClock.getLatestAnchor().anchorTimeMs : undefined);
-      const result = window.CortanaVisemeScheduler.playTimeline(detail.events, anchor);
+      let result;
+      if (Array.isArray(detail.audioEvents)) {
+        const anchor = detail.anchor || (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor());
+        result = window.CortanaAudioClock.scheduleAudioAlignedTimeline(
+          window.CortanaVisemeScheduler, detail.audioEvents, anchor
+        );
+      } else if (Array.isArray(detail.events)) {
+        const anchor = Number.isFinite(detail.anchorTimeMs)
+          ? detail.anchorTimeMs
+          : (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor()
+            ? window.CortanaAudioClock.getLatestAnchor().anchorTimeMs : undefined);
+        result = window.CortanaVisemeScheduler.playTimeline(detail.events, anchor);
+      } else return;
       window.dispatchEvent(new CustomEvent("cortana:viseme-timeline-result", {
         detail: { accepted: true, scheduled: result.scheduled, source: "audio-aligned-provider" }
       }));
