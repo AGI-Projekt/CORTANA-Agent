@@ -73,9 +73,9 @@ test("timeline emits cues at declared offsets and returns to neutral", () => {
     { atMs: 100, durationMs: 80, viseme: "round", character: "o" }
   ], 0);
   assert.equal(result.scheduled, 2);
-  assert.equal(h.emitted.at(-1).detail.viseme, "neutral");
-  h.advance(100);
   assert.equal(h.emitted.at(-1).detail.viseme, "open");
+  h.advance(100);
+  assert.equal(h.emitted.at(-1).detail.viseme, "round");
   h.advance(100);
   assert.equal(h.emitted.at(-1).detail.viseme, "round");
   h.advance(80);
@@ -132,6 +132,8 @@ test("audio-aligned timeline maps AudioContext timestamps onto monotonic playbac
     { audioTimeSeconds: 4.7, durationMs: 60, viseme: "round", character: "o" }
   ], { anchorTimeMs: 0, contextTimeSeconds: 4.5 });
   assert.equal(result.scheduled, 2);
+  assert.equal(h.emitted.at(-1).detail.viseme, "neutral");
+  h.advance(100);
   assert.equal(h.emitted.at(-1).detail.viseme, "open");
   h.advance(100);
   assert.equal(h.emitted.at(-1).detail.viseme, "round");
