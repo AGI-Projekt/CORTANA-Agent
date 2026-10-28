@@ -19,6 +19,10 @@ def test_avatar_loads_emotion_animation_engine_and_uses_interpolated_state():
     assert "emotionEngine.setVoiceActivity" in avatar
     assert "cortana:voice-state" in app
     assert "setVoiceActivity(level, speaking)" in engine
+    assert "cortana:audio-aligned-visemes" in app
+    sequencer = (static_dir / "gesture-sequencer.js").read_text(encoding="utf-8")
+    assert "CortanaGestureSequencer" in sequencer
+    assert "cortana:gesture-frame" in sequencer
     assert "cortana:emotion-transition" in app
     assert 'version: "1.2.0"' in engine
 
