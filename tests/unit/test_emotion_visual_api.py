@@ -70,11 +70,13 @@ def test_procedural_avatar_contains_all_eight_visual_profiles():
 
     static_dir = Path(app_module.__file__).resolve().parent / "static"
     avatar_script = (static_dir / "avatar3d.js").read_text(encoding="utf-8")
+    engine_script = (static_dir / "emotion-animation.js").read_text(encoding="utf-8")
     app_script = (static_dir / "app.js").read_text(encoding="utf-8")
     for expression in (
         "calm", "joy", "sadness", "anger", "fear", "surprise", "disgust", "determination"
     ):
-        assert expression + ":" in avatar_script
-        assert expression + ":" in app_script or expression in app_script
+        assert expression + ":" in engine_script
+        assert expression in app_script
     assert "dataset.emotion" in app_script
     assert "emotionProfile.headTilt" in avatar_script
+    assert "emotionEngine.update(deltaSeconds)" in avatar_script
