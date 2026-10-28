@@ -174,7 +174,9 @@
           event.audioTimeSeconds < 0 || event.audioTimeSeconds > 86400) {
         throw new TypeError("audioTimeSeconds must be a finite AudioContext timestamp");
       }
-      const atMs = (event.audioTimeSeconds - anchor.contextTimeSeconds) * 1000;
+      // Normalize floating-point AudioContext seconds to integer milliseconds so
+      // decimal timestamps such as 4.7 - 4.5 do not drift past a timer boundary.
+      const atMs = Math.round((event.audioTimeSeconds - anchor.contextTimeSeconds) * 1000);
       if (atMs < -MAX_OFFSET_MS || atMs > MAX_OFFSET_MS) {
         throw new RangeError("audio timestamp is outside the supported anchor window");
       }
