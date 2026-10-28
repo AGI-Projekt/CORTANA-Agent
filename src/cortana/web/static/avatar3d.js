@@ -1,6 +1,5 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import "./emotion-animation.js";
-import "./gesture-sequencer.js";
 
 (() => {
   "use strict";
@@ -227,12 +226,11 @@ import "./gesture-sequencer.js";
       // the baseline pose. The envelopes are smooth and bounded to avoid abrupt snaps.
       const voicePulse = speaking ? emotionProfile.voiceActivity * 0.22 : 0;
       const gestureWave = Math.sin(elapsed * (speaking ? 3.1 : 0.75));
-      const sequenceBlend = sequencedGesture.intensity;
-      const armLift = emotionProfile.armLift + voicePulse * (0.65 + 0.35 * gestureWave) + sequencedGesture.armLift * sequenceBlend;
-      const armOpen = emotionProfile.armOpen + voicePulse * 0.32 + sequencedGesture.armOpen * sequenceBlend;
+      const armLift = emotionProfile.armLift + voicePulse * (0.65 + 0.35 * gestureWave) + sequencedGesture.armLift;
+      const armOpen = emotionProfile.armOpen + voicePulse * 0.32 + sequencedGesture.armOpen;
       leftArm.rotation.z += ((armLift + armOpen + Math.sin(elapsed * 1.3) * emotionProfile.gesturePulse * 0.15) - leftArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
       rightArm.rotation.z += ((-armLift - armOpen + Math.sin(elapsed * 1.3 + 0.6) * emotionProfile.gesturePulse * 0.15) - rightArm.rotation.z) * blendFactor(deltaSeconds, 0.16);
-      leftArm.rotation.x += ((emotionProfile.wristTurn + voicePulse * 0.12 + sequencedGesture.wristTurn * sequenceBlend) - leftArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
+      leftArm.rotation.x += ((emotionProfile.wristTurn + voicePulse * 0.12 + sequencedGesture.wristTurn) - leftArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
       rightArm.rotation.x += ((-emotionProfile.wristTurn - voicePulse * 0.12 - sequencedGesture.wristTurn * sequenceBlend) - rightArm.rotation.x) * blendFactor(deltaSeconds, 0.18);
       ringMaterial.color.setHex(emotionProfile.color);
       orbitB.material.color.setHex(emotionProfile.color);
