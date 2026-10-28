@@ -1,6 +1,6 @@
 /* Viseme scheduler for the procedural avatar.
  * Text deltas use approximate grapheme timing; playTimeline accepts externally aligned
- * timestamp events when a provider supplies them. Transcript timing is not phoneme timing.
+ * timestamp events when a provider supplies audio-clock timestamps. Transcript timing is not phoneme timing.
  */
 (() => {
   "use strict";
@@ -161,8 +161,30 @@
     return {scheduled: normalized.length};
   }
 
+  function playAudioAlignedTimeline(events, anchor) {
+    if (!anchor || !Number.isFinite(anchor.anchorTimeMs) || !Number.isFinite(anchor.contextTimeSeconds)) {
+      throw new TypeError("a valid audio playout anchor is required");
+    }
+    if (!Array.isArray(events) || events.length > MAX_TIMELINE_EVENTS) {
+      throw new RangeError("audio-aligned events must be a bounded array");
+    }
+    const mapped = events.map(event => {
+      if (!event || typeof event !== "object" ||
+          typeof event.audioTimeSeconds !== "number" || !Number.isFinite(event.audioTimeSeconds) ||
+          event.audioTimeSeconds < 0 || event.audioTimeSeconds > 86400) {
+        throw new TypeError("audioTimeSeconds must be a finite AudioContext timestamp");
+      }
+      const atMs = (event.audioTimeSeconds - anchor.contextTimeSeconds) * 1000;
+      if (atMs < -MAX_OFFSET_MS || atMs > MAX_OFFSET_MS) {
+        throw new RangeError("audio timestamp is outside the supported anchor window");
+      }
+      return { atMs: Math.max(0, atMs), durationMs: event.durationMs, viseme: event.viseme, character: event.character || "" };
+    });
+    return playTimeline(mapped, anchor.anchorTimeMs);
+  }
+
   window.CortanaVisemeScheduler = Object.freeze({
-    classify, enqueue, playTimeline, reset,
+    classify, enqueue, playTimeline, playAudioAlignedTimeline, reset,
     getMode: () => mode,
     limits: Object.freeze({
       maxTextQueue: MAX_TEXT_QUEUE,
