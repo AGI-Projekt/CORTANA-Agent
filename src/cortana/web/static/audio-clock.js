@@ -61,8 +61,17 @@
     return scheduler.playTimeline(events, latestAnchor.anchorTimeMs);
   }
 
+  function scheduleAudioAlignedTimeline(scheduler, events, anchor) {
+    if (!scheduler || typeof scheduler.playAudioAlignedTimeline !== "function") {
+      throw new TypeError("a viseme scheduler with playAudioAlignedTimeline is required");
+    }
+    const selectedAnchor = anchor || latestAnchor;
+    if (!selectedAnchor) throw new Error("No audio playout anchor has been captured for this response");
+    return scheduler.playAudioAlignedTimeline(events, selectedAnchor);
+  }
+
   window.CortanaAudioClock = Object.freeze({
     capturePlaybackAnchor, performanceTimeForContextTime, markOutputStart,
-    resetOutputAnchor, getLatestAnchor, scheduleTimeline
+    resetOutputAnchor, getLatestAnchor, scheduleTimeline, scheduleAudioAlignedTimeline
   });
 })();
