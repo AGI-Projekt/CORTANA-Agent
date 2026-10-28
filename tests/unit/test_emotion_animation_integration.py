@@ -14,8 +14,13 @@ def test_avatar_loads_emotion_animation_engine_and_uses_interpolated_state():
     assert "emotionEngine.update(deltaSeconds)" in avatar
     assert "emotionProfile.bodySway" in avatar
     assert "emotionProfile.breath" in avatar
+    assert "createArm" in avatar
+    assert "emotionProfile.armLift" in avatar
+    assert "emotionEngine.setVoiceActivity" in avatar
+    assert "cortana:voice-state" in app
+    assert "setVoiceActivity(level, speaking)" in engine
     assert "cortana:emotion-transition" in app
-    assert "version: \"1.1.0\"" in engine
+    assert 'version: "1.2.0"' in engine
 
 
 def test_engine_has_fallback_and_bounded_transition_parameters():
