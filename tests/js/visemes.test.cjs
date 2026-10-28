@@ -128,7 +128,7 @@ test("audio-aligned timeline maps AudioContext timestamps onto monotonic playbac
   const result = h.scheduler.playAudioAlignedTimeline([
     { audioTimeSeconds: 4.6, durationMs: 80, viseme: "open", character: "a" },
     { audioTimeSeconds: 4.7, durationMs: 60, viseme: "round", character: "o" }
-  ], { anchorTimeMs: 10000, contextTimeSeconds: 4.5 });
+  ], { anchorTimeMs: 0, contextTimeSeconds: 4.5 });
   assert.equal(result.scheduled, 2);
   assert.equal(h.emitted.at(-1).detail.viseme, "open");
   h.advance(100);
