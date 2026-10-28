@@ -44,6 +44,9 @@
   function setAvatarEmotion(emotion) {
     const safeEmotion = Object.prototype.hasOwnProperty.call(emotionLabels, emotion) ? emotion : "calm";
     el.avatar.dataset.emotion = safeEmotion;
+    window.dispatchEvent(new CustomEvent("cortana:emotion-transition", {
+      detail: { emotion: safeEmotion, source: "emotion-core-ui" }
+    }));
     const label = byId("avatar-emotion");
     if (label) label.textContent = emotionLabels[safeEmotion];
   }
