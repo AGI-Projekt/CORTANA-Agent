@@ -121,3 +121,25 @@ test("text queue interrupts timeline and can continue in approximate mode", () =
   assert.equal(h.scheduler.getMode(), "text");
   assert.equal(h.emitted.at(-1).detail.viseme, "open");
 });
+
+
+test("audio-aligned timeline maps AudioContext timestamps onto monotonic playback time", () => {
+  const h = makeHarness();
+  const result = h.scheduler.playAudioAlignedTimeline([
+    { audioTimeSeconds: 4.6, durationMs: 80, viseme: "open", character: "a" },
+    { audioTimeSeconds: 4.7, durationMs: 60, viseme: "round", character: "o" }
+  ], { anchorTimeMs: 0, contextTimeSeconds: 4.5 });
+  assert.equal(result.scheduled, 2);
+  assert.equal(h.emitted.at(-1).detail.viseme, "neutral");
+  h.advance(100);
+  assert.equal(h.emitted.at(-1).detail.viseme, "open");
+  h.advance(100);
+  assert.equal(h.emitted.at(-1).detail.viseme, "round");
+});
+
+test("audio-aligned timeline rejects missing anchors, invalid timestamps, and oversized input", () => {
+  const h = makeHarness();
+  assert.throws(() => h.scheduler.playAudioAlignedTimeline([], null), /anchor/);
+  assert.throws(() => h.scheduler.playAudioAlignedTimeline([{audioTimeSeconds:NaN,durationMs:20,viseme:"open"}], {anchorTimeMs:0,contextTimeSeconds:0}), /audioTimeSeconds/);
+  assert.throws(() => h.scheduler.playAudioAlignedTimeline(Array(513).fill({audioTimeSeconds:1,durationMs:20,viseme:"open"}), {anchorTimeMs:0,contextTimeSeconds:0}), /bounded array/);
+});

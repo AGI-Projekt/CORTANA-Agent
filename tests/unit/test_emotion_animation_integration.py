@@ -20,6 +20,8 @@ def test_avatar_loads_emotion_animation_engine_and_uses_interpolated_state():
     assert "cortana:voice-state" in app
     assert "setVoiceActivity(level, speaking)" in engine
     assert "cortana:audio-aligned-visemes" in app
+    assert "scheduleAudioAlignedTimeline" in app
+    assert "playAudioAlignedTimeline" in (static_dir / "visemes.js").read_text(encoding="utf-8")
     sequencer = (static_dir / "gesture-sequencer.js").read_text(encoding="utf-8")
     assert "CortanaGestureSequencer" in sequencer
     assert "cortana:gesture-frame" in sequencer
