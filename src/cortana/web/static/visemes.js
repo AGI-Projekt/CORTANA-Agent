@@ -182,7 +182,12 @@
       }
       return { atMs: Math.max(0, atMs), durationMs: event.durationMs, viseme: event.viseme, character: event.character || "" };
     });
-    return playTimeline(mapped, anchor.anchorTimeMs);
+    const calibrationOffset = window.CortanaLipSyncCalibration
+      ? window.CortanaLipSyncCalibration.getOffsetMs() : 0;
+    const calibratedAnchor = Object.assign({}, anchor, {
+      anchorTimeMs: anchor.anchorTimeMs + calibrationOffset
+    });
+    return playTimeline(mapped, calibratedAnchor.anchorTimeMs);
   }
 
   window.CortanaVisemeScheduler = Object.freeze({

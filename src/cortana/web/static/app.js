@@ -79,6 +79,30 @@
     }
   });
 
+  // A provider adapter can be attached by an application-specific acoustic aligner.
+  window.addEventListener("cortana:viseme-provider-connect", (event) => {
+    const detail = event && event.detail;
+    const anchor = remotePlaybackAnchor || (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor());
+    if (!detail || !detail.adapter || !anchor || !window.CortanaVisemeProvider) return;
+    try {
+      window.CortanaVisemeProvider.connect(detail.adapter, anchor);
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent("cortana:viseme-provider-state", {
+        detail: { state: "error", reason: error instanceof Error ? error.message : "provider connection failed" }
+      }));
+    }
+  });
+  window.addEventListener("cortana:audio-playout-anchor", (event) => {
+    const anchor = event && event.detail;
+    if (anchor && window.CortanaVisemeProvider &&
+        window.CortanaVisemeProvider.getState() === "connected") {
+      window.CortanaVisemeProvider.updateAnchor(anchor);
+    }
+  });
+  window.addEventListener("cortana:audio-playout-reset", () => {
+    if (window.CortanaVisemeProvider) window.CortanaVisemeProvider.disconnect();
+  });
+
   function setWorking(text, isBusy) {
     el.workingText.textContent = text;
     el.working.dataset.busy = isBusy ? "true" : "false";
