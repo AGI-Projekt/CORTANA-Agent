@@ -1,5 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import "./emotion-animation.js";
+import "./facial-intelligence.js";
 
 (() => {
   "use strict";
@@ -112,6 +113,10 @@ import "./emotion-animation.js";
 
     const eyeLeft = ellipsoid(headRig, eyeMaterial, [-0.31, 0.1, 0.49], [0.17, 0.09, 0.055], 24);
     const eyeRight = ellipsoid(headRig, eyeMaterial, [0.31, 0.1, 0.49], [0.17, 0.09, 0.055], 24);
+    const browLeft = ellipsoid(headRig, hairMaterial, [-0.31, 0.29, 0.48], [0.19, 0.038, 0.045], 20);
+    const browRight = ellipsoid(headRig, hairMaterial, [0.31, 0.29, 0.48], [0.19, 0.038, 0.045], 20);
+    const cheekLeft = ellipsoid(headRig, eyeMaterial, [-0.47, -0.19, 0.43], [0.105, 0.045, 0.025], 20);
+    const cheekRight = ellipsoid(headRig, eyeMaterial, [0.47, -0.19, 0.43], [0.105, 0.045, 0.025], 20);
     ellipsoid(headRig, irisMaterial, [-0.31, 0.1, 0.54], [0.067, 0.066, 0.035], 24);
     ellipsoid(headRig, irisMaterial, [0.31, 0.1, 0.54], [0.067, 0.066, 0.035], 24);
     ellipsoid(headRig, darkMaterial, [0, -0.06, 0.55], [0.035, 0.18, 0.045], 16);
@@ -154,6 +159,7 @@ import "./emotion-animation.js";
     root.add(particles);
 
     const emotionEngine = window.CortanaEmotionAnimation.createEmotionAnimationEngine({ transitionSeconds: 0.42 });
+    const facialEngine = window.CortanaFacialIntelligence.createFacialIntelligence();
     let previousFrameTime = null;
     let currentEmotionProfile = emotionEngine.update(0);
     window.addEventListener("cortana:emotion-transition", (event) => {
@@ -218,6 +224,10 @@ import "./emotion-animation.js";
       root.rotation.y = Math.sin(elapsed * 0.38) * 0.05;
       headRig.rotation.y = Math.sin(elapsed * 0.68) * 0.065;
       const emotionProfile = currentEmotionProfile;
+      const facial = facialEngine.update({
+        deltaSeconds, emotion: emotionProfile.emotion, viseme: activeViseme,
+        speaking, audioLevel: voiceLevel
+      });
       headRig.rotation.x = Math.sin(elapsed * 0.57) * 0.02 + emotionProfile.headPitch;
       headRig.rotation.z = Math.sin(elapsed * 0.42) * 0.008 + emotionProfile.headTilt;
       root.rotation.z = Math.sin(elapsed * 0.62) * emotionProfile.bodySway;
@@ -260,13 +270,25 @@ import "./emotion-animation.js";
       const visemeProfile = visemeProfiles[activeViseme] || visemeProfiles.neutral;
       const audioBoost = liveAudioDriven ? mouthDrive * (activeViseme === "closed" ? 0.006 : 0.022) : 0;
       const blend = 1 - Math.exp(-Math.LN2 * Math.max(deltaSeconds, 0) / 0.07);
-      const targetMouthX = speaking ? visemeProfile[0] : emotionProfile.mouthX;
-      const targetMouthY = speaking ? visemeProfile[1] + audioBoost : emotionProfile.mouthY;
-      const targetMouthYPos = speaking ? visemeProfile[2] : emotionProfile.mouthYPos;
+      const expressionWidth = 1 + facial.mouthWide * 0.58 + facial.mouthSmile * 0.3 - facial.mouthPucker * 0.46;
+      const expressionOpening = facial.jawOpen * 0.038 + facial.lowerLipDepress * 0.012;
+      const targetMouthX = (speaking ? visemeProfile[0] : emotionProfile.mouthX) * expressionWidth;
+      const targetMouthY = (speaking ? visemeProfile[1] + audioBoost : emotionProfile.mouthY) + expressionOpening;
+      const targetMouthYPos = (speaking ? visemeProfile[2] : emotionProfile.mouthYPos) - facial.jawOpen * 0.012;
       mouth.scale.x += (targetMouthX - mouth.scale.x) * blend;
       mouth.scale.y += (targetMouthY - mouth.scale.y) * blend;
       mouth.position.y += (targetMouthYPos - mouth.position.y) * blend;
-      lipHighlight.scale.x += ((activeViseme === "wide" ? 1.14 : activeViseme === "round" ? 0.64 : 1) - lipHighlight.scale.x) * blend;
+      lipHighlight.scale.x += ((activeViseme === "wide" ? 1.14 : activeViseme === "round" ? 0.64 : 1) * (1 + facial.mouthSmile * 0.2) - lipHighlight.scale.x) * blend;
+      const browLift = facial.browInnerUp * 0.075 - facial.browDown * 0.055;
+      browLeft.position.y += ((0.29 + browLift) - browLeft.position.y) * blend;
+      browRight.position.y += ((0.29 + browLift) - browRight.position.y) * blend;
+      browLeft.rotation.z += ((facial.browDown * 0.16 - facial.browInnerUp * 0.08) - browLeft.rotation.z) * blend;
+      browRight.rotation.z += ((-facial.browDown * 0.16 + facial.browInnerUp * 0.08) - browRight.rotation.z) * blend;
+      const cheekScale = 1 + facial.cheekRaise * 0.38;
+      cheekLeft.scale.y += ((0.045 * cheekScale) - cheekLeft.scale.y) * blend;
+      cheekRight.scale.y += ((0.045 * cheekScale) - cheekRight.scale.y) * blend;
+      cheekLeft.material.opacity = 0.42 + facial.cheekRaise * 0.42;
+      cheekRight.material.opacity = 0.42 + facial.cheekRaise * 0.42;
 
       // Procedural blink with a short close/open envelope; restore eye scale after each blink.
       if (elapsed >= nextBlinkAt) {
@@ -277,10 +299,11 @@ import "./emotion-animation.js";
       const blink = blinkElapsed >= 0 && blinkElapsed < 0.17
         ? Math.sin((blinkElapsed / 0.17) * Math.PI)
         : 0;
+      const eyeExpression = Math.max(0.55, Math.min(1.7, 1 + facial.eyeWide * 0.62 - facial.eyeSquint * 0.58));
       eyeLeft.scale.x = emotionProfile.eyeX;
       eyeRight.scale.x = emotionProfile.eyeX;
-      eyeLeft.scale.y = emotionProfile.eyeY * (1 - blink * 0.94);
-      eyeRight.scale.y = emotionProfile.eyeY * (1 - blink * 0.94);
+      eyeLeft.scale.y = emotionProfile.eyeY * eyeExpression * (1 - blink * 0.94);
+      eyeRight.scale.y = emotionProfile.eyeY * eyeExpression * (1 - blink * 0.94);
       if (listening) {
         ringMaterial.opacity = 0.65;
         faceLight.intensity = 5.2;
