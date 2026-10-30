@@ -50,9 +50,11 @@
   function push(batch) {
     if (state !== "connected") throw new Error("viseme provider is not connected");
     const normalized = validateBatch(batch);
-    const now = anchor ? anchor.contextTimeSeconds : 0;
+    const nowPerformanceMs = performance.now();
     const accepted = normalized.filter(item => {
-      const deltaMs = (item.audioTimeSeconds - now) * 1000;
+      const duePerformanceMs = anchor.anchorTimeMs +
+        (item.audioTimeSeconds - anchor.contextTimeSeconds) * 1000;
+      const deltaMs = duePerformanceMs - nowPerformanceMs;
       return deltaMs >= -MAX_LATENESS_MS && deltaMs <= MAX_FUTURE_MS;
     });
     const dropped = normalized.length - accepted.length;
