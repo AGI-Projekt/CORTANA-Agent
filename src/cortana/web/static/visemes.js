@@ -154,7 +154,15 @@
       let timer = null;
       timer = window.setTimeout(() => {
         timelineTimers = timelineTimers.filter(item => item !== timer);
-        if (generation === ownGeneration && mode === "timeline") emitAt(boundary);
+        if (generation === ownGeneration && mode === "timeline") {
+          if (window.CortanaPredictiveLipSync) {
+            window.CortanaPredictiveLipSync.observe({
+              scheduledTimeMs: anchor + boundary,
+              actualTimeMs: performance.now()
+            });
+          }
+          emitAt(boundary);
+        }
       }, Math.max(0, anchor + boundary - performance.now()));
       timelineTimers.push(timer);
     }
