@@ -154,7 +154,15 @@
       let timer = null;
       timer = window.setTimeout(() => {
         timelineTimers = timelineTimers.filter(item => item !== timer);
-        if (generation === ownGeneration && mode === "timeline") emitAt(boundary);
+        if (generation === ownGeneration && mode === "timeline") {
+          if (window.CortanaPredictiveLipSync) {
+            window.CortanaPredictiveLipSync.observe({
+              scheduledTimeMs: anchor + boundary,
+              actualTimeMs: performance.now()
+            });
+          }
+          emitAt(boundary);
+        }
       }, Math.max(0, anchor + boundary - performance.now()));
       timelineTimers.push(timer);
     }
@@ -184,7 +192,10 @@
     });
     const correction = window.CortanaLipSyncCalibration
       ? window.CortanaLipSyncCalibration.getOffsetMs() : 0;
-    return playTimeline(mapped, anchor.anchorTimeMs + correction);
+    const calibratedAnchor = Object.assign({}, anchor, { anchorTimeMs: anchor.anchorTimeMs + correction });
+    const predictiveAnchor = window.CortanaPredictiveLipSync
+      ? window.CortanaPredictiveLipSync.adjustAnchor(calibratedAnchor) : calibratedAnchor;
+    return playTimeline(mapped, predictiveAnchor.anchorTimeMs);
   }
 
   window.CortanaVisemeScheduler = Object.freeze({
