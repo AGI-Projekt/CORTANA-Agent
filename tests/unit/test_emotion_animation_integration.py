@@ -29,6 +29,11 @@ def test_avatar_loads_emotion_animation_engine_and_uses_interpolated_state():
     assert "adjustAnchor" in (static_dir / "visemes.js").read_text(encoding="utf-8")
     assert "actualTimeMs: performance.now()" in (static_dir / "visemes.js").read_text(encoding="utf-8")
     assert "predictive-lipsync.js" in (static_dir / "index.html").read_text(encoding="utf-8")
+    assert "phoneme-alignment.js" in (static_dir / "index.html").read_text(encoding="utf-8")
+    assert "neural-viseme-predictor.js" in (static_dir / "index.html").read_text(encoding="utf-8")
+    assert "CortanaPhonemeAlignment" in (static_dir / "phoneme-alignment.js").read_text(encoding="utf-8")
+    assert "CortanaNeuralVisemePredictor" in (static_dir / "neural-viseme-predictor.js").read_text(encoding="utf-8")
+    assert "event.phonemes" in (static_dir / "viseme-provider.js").read_text(encoding="utf-8")
     sequencer = (static_dir / "gesture-sequencer.js").read_text(encoding="utf-8")
     assert "CortanaGestureSequencer" in sequencer
     assert "cortana:gesture-frame" in sequencer

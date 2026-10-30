@@ -33,11 +33,19 @@ jobs:
           python -m pip install -e ".[test,web]"
       - name: Run tests
         run: python -m pytest -q
+      - name: Run browser predictive lip-sync tests
+        run: node --test tests/js/predictive-lipsync.test.cjs
       - name: Run browser scheduler tests
         run: node --test tests/js/visemes.test.cjs
       - name: Run browser audio-clock tests
         run: node --test tests/js/audio-clock.test.cjs
       - name: Run browser viseme-provider tests
         run: node --test tests/js/viseme-provider.test.cjs
+      - name: Run browser phoneme alignment tests
+        run: node --test tests/js/phoneme-alignment.test.cjs
+      - name: Run browser neural viseme predictor tests
+        run: node --test tests/js/neural-viseme-predictor.test.cjs
+      - name: Run browser phoneme provider integration tests
+        run: node --test tests/js/phoneme-provider.test.cjs
       - name: Run browser facial-intelligence tests
         run: node --test tests/js/facial-intelligence.test.cjs
