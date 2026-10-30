@@ -43,5 +43,7 @@ jobs:
         run: node --test tests/js/phoneme-alignment.test.cjs
       - name: Run browser neural viseme predictor tests
         run: node --test tests/js/neural-viseme-predictor.test.cjs
+      - name: Run browser phoneme provider integration tests
+        run: node --test tests/js/phoneme-provider.test.cjs
       - name: Run browser facial-intelligence tests
         run: node --test tests/js/facial-intelligence.test.cjs
