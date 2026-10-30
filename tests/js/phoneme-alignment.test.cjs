@@ -1,0 +1,6 @@
+const {test}=require("node:test");const assert=require("node:assert/strict");const fs=require("node:fs");const vm=require("node:vm");
+const source=fs.readFileSync("src/cortana/web/static/phoneme-alignment.js","utf8");
+function api(){const window={};vm.runInNewContext(source,{window,Object,Number,Array,Set,TypeError,RangeError},{filename:"phoneme-alignment.js"});return window.CortanaPhonemeAlignment;}
+test("maps IPA phonemes to visemes and preserves timestamp boundaries",()=>{const a=api(),out=a.align([{startTimeSeconds:0.2,endTimeSeconds:0.28,phoneme:"m"},{startTimeSeconds:0.1,endTimeSeconds:0.18,phoneme:"a"}]);assert.equal(out[0].viseme,"open");assert.equal(out[1].viseme,"closed");assert.equal(out[0].audioTimeSeconds,0.1);assert.equal(out[1].durationMs,80);});
+test("normalizes IPA and safely maps unknown phonemes to neutral",()=>{const a=api();assert.equal(a.toViseme("P"),"closed");assert.equal(a.toViseme("☃"),"neutral");});
+test("rejects malformed, reversed, oversized, and excessive-duration events",()=>{const a=api();assert.throws(()=>a.align([]),/bounded/);assert.throws(()=>a.align([{startTimeSeconds:1,endTimeSeconds:0.9,phoneme:"a"}]),/boundaries/);assert.throws(()=>a.align([{startTimeSeconds:0,endTimeSeconds:8,phoneme:"a"}]),/duration/);assert.throws(()=>a.align([{startTimeSeconds:0,endTimeSeconds:0.1,phoneme:""}]),/phoneme/);});
