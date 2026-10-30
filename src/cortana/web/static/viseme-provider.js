@@ -31,7 +31,7 @@ if(!anchor||!Number.isFinite(anchor.anchorTimeMs)||!Number.isFinite(anchor.conte
 if(!scheduler||typeof scheduler.playAudioAlignedTimeline!=="function")throw new TypeError("audio-aligned viseme scheduler is required");
 let prediction=null;
 if(Array.isArray(event.phonemes)&&window.CortanaNeuralVisemePredictor){
-const training=events.map((item,index)=>({phoneme:window.CortanaPhonemeAlignment.normalizePhoneme(event.phonemes[index].phoneme),viseme:item.viseme}));
+const training=events.map(item=>({phoneme:item.phoneme,viseme:item.viseme}));
 if(training.length>=2)window.CortanaNeuralVisemePredictor.train(training);
 const context=training.slice(-2).map(item=>item.phoneme);
 prediction=window.CortanaNeuralVisemePredictor.predictNext(context);
