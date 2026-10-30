@@ -184,7 +184,10 @@
     });
     const correction = window.CortanaLipSyncCalibration
       ? window.CortanaLipSyncCalibration.getOffsetMs() : 0;
-    return playTimeline(mapped, anchor.anchorTimeMs + correction);
+    const calibratedAnchor = Object.assign({}, anchor, { anchorTimeMs: anchor.anchorTimeMs + correction });
+    const predictiveAnchor = window.CortanaPredictiveLipSync
+      ? window.CortanaPredictiveLipSync.adjustAnchor(calibratedAnchor) : calibratedAnchor;
+    return playTimeline(mapped, predictiveAnchor.anchorTimeMs);
   }
 
   window.CortanaVisemeScheduler = Object.freeze({
