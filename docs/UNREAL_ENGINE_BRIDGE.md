@@ -17,7 +17,7 @@ const bridge = window.CortanaUnrealBridge.createUnrealBridge();
 bridge.connect("wss://your-host.example/avatar");
 ```
 
-For local development only, `ws://localhost` and loopback addresses are allowed. Remote endpoints must use `wss://`. Call `publish({ state, emotion, viseme, audioLevel, facial, timestampMs })` with the current avatar frame. The sender defaults to ~30 Hz, clamps numeric channels to [0, 1], allowlists state/emotion/viseme labels, adds a monotonically increasing sequence, and exposes dropped-frame counters. Call `disconnect()` when the presentation session ends.
+For local development only, `ws://localhost` and loopback addresses are allowed. Remote endpoints must use `wss://`. Assign the connected instance to `window.CortanaUnrealBridgeRuntime` so the avatar renderer can publish frames: `window.CortanaUnrealBridgeRuntime = bridge`. Call `publish({ state, emotion, viseme, audioLevel, facial, timestampMs })` with the current avatar frame when publishing manually. The sender defaults to ~30 Hz, clamps numeric channels to [0, 1], allowlists state/emotion/viseme labels, adds a monotonically increasing sequence, and exposes dropped-frame counters. Call `disconnect()` when the presentation session ends.
 
 The avatar runtime publishes frames only after an application explicitly creates and connects a bridge. No microphone samples, transcript, prompt, credentials, or conversation history are sent.
 
