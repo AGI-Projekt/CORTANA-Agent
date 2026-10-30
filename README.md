@@ -9,7 +9,7 @@ CORTANA-Agent is a modular conversational agent foundation. It includes a model 
 
 - Browser interface with a procedurally generated WebGL/Three.js 3D avatar and states for listening, thinking, speaking, and idle.
 - Eight opt-in, confidence-gated visual expressions for Lilith Cortana Nebiru, with neutral fallback and no permission escalation.
-- Emotion Core v1.7 adds timestamped phoneme-to-viseme alignment and a compact online-trained neural viseme predictor on top of v1.6 adaptive scheduling; v1.3 gesture sequences and v1.2 full-body animation remain available.
+- Emotion Core v1.8 adds context-aware emotion/prosody fusion and audio-clock synchronization on top of v1.7 phoneme alignment and online viseme prediction; v1.3 gesture sequences and v1.2 full-body animation remain available.
 - Full-duplex Realtime API voice via WebRTC with a short-lived browser credential and selectable voice.
 - Explicit microphone permission and a manual record/stop workflow.
 - Speech transcription with the gpt-transcribe audio model, a 25 MiB request limit, and no local audio-file persistence.
@@ -69,7 +69,7 @@ Never commit API keys or put them in the browser. The live voice endpoint return
 - Tool registry with explicit allowlist.
 - Structured self-improvement proposals requiring review and tests.
 
-See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, docs/EMOTION_CORE_V1_4_AUDIO_ALIGNED_LIPSYNC.md, docs/EMOTION_CORE_V1_5_REALTIME_VISEME_PROVIDER.md, docs/EMOTION_CORE_V1_6_PREDICTIVE_LIPSYNC.md, docs/EMOTION_CORE_V1_7_PHONEME_ALIGNMENT_NEURAL_VISEME.md, and docs/SELF_IMPROVEMENT.md.
+See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, docs/EMOTION_CORE_V1_4_AUDIO_ALIGNED_LIPSYNC.md, docs/EMOTION_CORE_V1_5_REALTIME_VISEME_PROVIDER.md, docs/EMOTION_CORE_V1_6_PREDICTIVE_LIPSYNC.md, docs/EMOTION_CORE_V1_7_PHONEME_ALIGNMENT_NEURAL_VISEME.md, docs/EMOTION_CORE_V1_8_CONTEXT_AWARE_MULTIMODAL_PROSODY_SYNC.md, and docs/SELF_IMPROVEMENT.md.
 
 
 ## Viseme timing API
