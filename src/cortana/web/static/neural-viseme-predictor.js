@@ -31,7 +31,7 @@
     let loss=0,samples=0;
     for(let epoch=0;epoch<epochs;epoch++){
       for(let i=0;i<rows.length;i++){
-        const x=features([rows[Math.max(0,i-2)].phoneme,rows[i-1].phoneme]),{hidden,probabilities}=forward(x),delta=probabilities.slice();
+        const x=features([i>=2?rows[i-2].phoneme:"<unk>",i>=1?rows[i-1].phoneme:"<unk>"]),{hidden,probabilities}=forward(x),delta=probabilities.slice();
         delta[rows[i].target]-=1;loss-=Math.log(Math.max(probabilities[rows[i].target],1e-9));samples++;
         const oldW2=w2.map(row=>row.slice());
         for(let o=0;o<OUTPUT;o++){for(let h=0;h<H;h++)w2[o][h]-=rate*delta[o]*hidden[h];b2[o]-=rate*delta[o];}
