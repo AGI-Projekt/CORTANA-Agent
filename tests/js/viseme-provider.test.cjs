@@ -7,7 +7,7 @@ function harness(){
   const events=[], timers=new Map(); let id=0;
   const window={dispatchEvent(e){events.push(e);},setTimeout(fn){const n=++id;timers.set(n,fn);return n;},clearTimeout(n){timers.delete(n);}};
   class CE{constructor(type,init={}){this.type=type;this.detail=init.detail||{};}}
-  vm.runInNewContext(source,{window,CustomEvent:CE,Number,Object,Array,TypeError,RangeError}, {filename:"viseme-provider.js"});
+  vm.runInNewContext(source,{window,CustomEvent:CE,performance:{now:()=>1000},Number,Object,Array,TypeError,RangeError}, {filename:"viseme-provider.js"});
   return {api:window.CortanaVisemeProvider,events,timers,flush(){for(const [n,fn] of timers){timers.delete(n);fn();}}};
 }
 const anchor={anchorTimeMs:1000,contextTimeSeconds:2};
