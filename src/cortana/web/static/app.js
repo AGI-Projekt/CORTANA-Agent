@@ -21,6 +21,8 @@
   let remoteAudioContext = null, remoteAudioAnalyser = null, remoteAudioSource = null;
   let remotePlaybackAnchor = null;
   let remoteAudioOnsetDetected = false;
+  let activeRealtimeResponseId = null;
+  let activeResponseHasAlignedVisemes = false;
 
   let remoteAudioSamples = null, remoteAudioFrame = null, remoteAudioLevel = 0;
 
@@ -328,6 +330,8 @@
       }
     } else if (event.type === "response.created") {
       if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.reset();
+      activeRealtimeResponseId = event.response && typeof event.response.id === "string" ? event.response.id : null;
+      activeResponseHasAlignedVisemes = false;
       remoteAudioOnsetDetected = false;
       remotePlaybackAnchor = null;
       if (window.CortanaAudioClock) window.CortanaAudioClock.resetOutputAnchor();
@@ -335,6 +339,14 @@
       setWorking("Cortana odpowiada…", true);
       liveAssistantP = null;
       liveAssistantText = "";
+    } else if (event.type === "cortana.viseme.timeline") {
+      try {
+        const result = window.CortanaVisemeProvider.accept(event, activeRealtimeResponseId,
+          remotePlaybackAnchor || (window.CortanaAudioClock && window.CortanaAudioClock.getLatestAnchor()),
+          window.CortanaVisemeScheduler);
+        activeResponseHasAlignedVisemes = result.accepted;
+        el.avatar.dataset.visemeTiming = "audio-aligned";
+      } catch (_) { el.avatar.dataset.visemeTiming = "approximate"; }
     } else if (event.type === "response.output_audio.delta" || event.type === "response.audio.delta") {
       setAvatarState("speaking");
     } else if (
@@ -342,7 +354,7 @@
       event.type === "response.audio_transcript.delta"
     ) {
       appendLiveTranscript("assistant", event.delta || "");
-      if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.enqueue(event.delta || "");
+      if (!activeResponseHasAlignedVisemes && window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.enqueue(event.delta || "");
     } else if (
       event.type === "response.output_audio_transcript.done" ||
       event.type === "response.audio_transcript.done"
@@ -361,6 +373,8 @@
       }
       liveAssistantP = null;
       liveAssistantText = "";
+      activeRealtimeResponseId = null;
+      activeResponseHasAlignedVisemes = false;
     } else if (event.type === "error") {
       showError("Sesja głosowa zgłosiła błąd. Zakończ połączenie i spróbuj ponownie.");
       setWorking("Problem z sesją głosową", false);
@@ -372,6 +386,8 @@
     if (window.CortanaVisemeScheduler) window.CortanaVisemeScheduler.reset();
     realtimeActive = false;
     realtimeConnecting = false;
+    activeRealtimeResponseId = null;
+    activeResponseHasAlignedVisemes = false;
     liveAssistantP = null;
     liveAssistantText = "";
     if (realtimeChannel) {
