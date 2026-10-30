@@ -47,3 +47,17 @@ def test_engine_has_fallback_and_bounded_transition_parameters():
     assert ' ? id : "calm"' in engine
     assert "clamp(Number(options.transitionSeconds) || 0.42, 0.08, 2.5)" in engine
     assert "clamp(Number.isFinite(deltaSeconds) ? deltaSeconds : 0, 0, 0.1)" in engine
+
+
+def test_multimodal_emotion_prosody_sync_is_loaded_and_documented():
+    static_dir = Path(app_module.__file__).resolve().parent / "static"
+    index = (static_dir / "index.html").read_text(encoding="utf-8")
+    sync = (static_dir / "emotion-prosody-sync.js").read_text(encoding="utf-8")
+    avatar = (static_dir / "avatar3d.js").read_text(encoding="utf-8")
+    assert "emotion-prosody-sync.js" in index
+    assert "CortanaEmotionProsodySync" in sync
+    assert "performanceTimeForContextTime" in sync
+    assert "cortana:multimodal-emotion" in sync
+    assert 'addEventListener("cortana:emotion-transition"' in avatar
+    assert "responseId" in sync
+    assert "cancel()" in sync
