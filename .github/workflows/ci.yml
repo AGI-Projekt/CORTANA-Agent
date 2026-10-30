@@ -49,3 +49,5 @@ jobs:
         run: node --test tests/js/phoneme-provider.test.cjs
       - name: Run browser facial-intelligence tests
         run: node --test tests/js/facial-intelligence.test.cjs
+      - name: Run browser emotion-prosody synchronization tests
+        run: node --test tests/js/emotion-prosody-sync.test.cjs
