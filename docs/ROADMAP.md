@@ -35,8 +35,6 @@ Status is updated only when implementation and tests have been verified.
 - [x] Add a Web Audio playout-clock bridge and first-audible-frame anchor for the viseme timeline.
 - [x] Add a validated provider-neutral ingestion contract for external audio-aligned viseme timelines.
 - [ ] Connect the ingestion contract to a provider that emits true audio-aligned phoneme/viseme timestamps.
-- [x] Add a deterministic facial-intelligence controller with smoothed emotion/viseme blendshape-style channels.
-- [x] Drive procedural brows, eyes, cheeks, and mouth from composed facial channels.
 - [ ] Replace procedural geometry with a designed, rigged 3D avatar and audio-aligned, phoneme-accurate viseme lip sync.
 - [ ] Add production authentication, rate limiting, and deployment hardening.
 - [x] Add opt-in Realtime transcript-to-Emotion Core guidance with neutral fallback and privacy-limited audit records.
