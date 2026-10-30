@@ -9,7 +9,7 @@ CORTANA-Agent is a modular conversational agent foundation. It includes a model 
 
 - Browser interface with a procedurally generated WebGL/Three.js 3D avatar and states for listening, thinking, speaking, and idle.
 - Eight opt-in, confidence-gated visual expressions for Lilith Cortana Nebiru, with neutral fallback and no permission escalation.
-- Emotion Core v1.4 adds an audio-clock aligned viseme runtime that maps provider-supplied AudioContext timestamps onto the browser playback clock; v1.3 gesture sequences and v1.2 full-body animation remain available.
+- Emotion Core v1.5 adds a bounded real-time viseme-provider bridge and robust median-based lip-sync offset calibration on top of the v1.4 audio-clock runtime; v1.3 gesture sequences and v1.2 full-body animation remain available.
 - Full-duplex Realtime API voice via WebRTC with a short-lived browser credential and selectable voice.
 - Explicit microphone permission and a manual record/stop workflow.
 - Speech transcription with the gpt-transcribe audio model, a 25 MiB request limit, and no local audio-file persistence.
@@ -69,7 +69,7 @@ Never commit API keys or put them in the browser. The live voice endpoint return
 - Tool registry with explicit allowlist.
 - Structured self-improvement proposals requiring review and tests.
 
-See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, docs/EMOTION_CORE_V1_4_AUDIO_ALIGNED_LIPSYNC.md, and docs/SELF_IMPROVEMENT.md.
+See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, docs/EMOTION_CORE_V1_4_AUDIO_ALIGNED_LIPSYNC.md, docs/EMOTION_CORE_V1_5_REALTIME_VISEME_PROVIDER.md, and docs/SELF_IMPROVEMENT.md.
 
 
 ## Viseme timing API
@@ -80,3 +80,8 @@ The browser includes an experimental timestamp-based viseme timeline API for fut
 ## Audio-synchronized viseme clock
 
 audio-clock.js bridges AudioContext.getOutputTimestamp() with the monotonic clock used by the viseme timeline and falls back explicitly when unsupported. It exposes the playout anchor for a future source of audio-aligned viseme timestamps. The current Realtime transcript-driven mouth shapes remain approximate; no phoneme alignment is inferred from transcript timing alone.
+
+
+## Real-time viseme provider and calibration
+
+Emotion Core v1.5 exposes `window.CortanaVisemeProvider` for application-specific acoustic aligners that publish allowlisted viseme events with AudioContext timestamps. Provider adapters implement `subscribe(push)`; the bridge validates, bounds, batches, and forwards events through the v1.4 audio-clock scheduler. `window.CortanaLipSyncCalibration` estimates a bounded clock offset from at least three paired audio/performance timestamp samples using a median estimator. This is calibration of a supplied alignment stream, not phoneme recognition. No provider SDK or acoustic model is bundled; transcript/grapheme timing remains an approximate fallback.
