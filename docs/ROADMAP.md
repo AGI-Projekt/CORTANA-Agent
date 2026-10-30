@@ -47,6 +47,9 @@ Status is updated only when implementation and tests have been verified.
 - [ ] Vision adapter with consent and explicit camera activation.
 - [ ] Temporal Emotion Core integration after archive and licensing review.
 - [ ] Native desktop shell or Unreal Engine presentation.
+- [x] Add a versioned, opt-in browser-to-Unreal avatar frame protocol and sender.
+- [ ] Implement and build the Unreal Engine 5 receiver, Animation Blueprint, and Control Rig/MetaHuman mapping.
+- [ ] Validate end-to-end audio, viseme, facial, and body animation timing in a real UE5 project.
 - [ ] Lip-sync from speech timing/visemes for a rigged avatar.
 
 ## Phase 4 — controlled improvement
