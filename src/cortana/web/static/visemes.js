@@ -182,7 +182,9 @@
       }
       return { atMs: Math.max(0, atMs), durationMs: event.durationMs, viseme: event.viseme, character: event.character || "" };
     });
-    return playTimeline(mapped, anchor.anchorTimeMs);
+    const correction = window.CortanaLipSyncCalibration
+      ? window.CortanaLipSyncCalibration.getOffsetMs() : 0;
+    return playTimeline(mapped, anchor.anchorTimeMs + correction);
   }
 
   window.CortanaVisemeScheduler = Object.freeze({
