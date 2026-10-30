@@ -49,3 +49,5 @@ jobs:
         run: node --test tests/js/phoneme-provider.test.cjs
       - name: Run browser facial-intelligence tests
         run: node --test tests/js/facial-intelligence.test.cjs
+      - name: Run browser Unreal bridge tests
+        run: node --test tests/js/unreal-bridge.test.cjs

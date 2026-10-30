@@ -1,6 +1,7 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import "./emotion-animation.js";
 import "./facial-intelligence.js";
+import "./unreal-bridge.js";
 
 (() => {
   "use strict";
@@ -228,6 +229,12 @@ import "./facial-intelligence.js";
         deltaSeconds, emotion: emotionProfile.emotion, viseme: activeViseme,
         speaking, audioLevel: voiceLevel
       });
+      if (window.CortanaUnrealBridgeRuntime) {
+        window.CortanaUnrealBridgeRuntime.publish({
+          timestampMs: nowMs, state, emotion: emotionProfile.emotion,
+          viseme: activeViseme, audioLevel: voiceLevel, facial
+        });
+      }
       headRig.rotation.x = Math.sin(elapsed * 0.57) * 0.02 + emotionProfile.headPitch;
       headRig.rotation.z = Math.sin(elapsed * 0.42) * 0.008 + emotionProfile.headTilt;
       root.rotation.z = Math.sin(elapsed * 0.62) * emotionProfile.bodySway;
