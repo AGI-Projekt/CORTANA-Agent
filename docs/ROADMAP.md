@@ -49,8 +49,9 @@ Status is updated only when implementation and tests have been verified.
 - [ ] Native desktop shell or Unreal Engine presentation.
 - [x] Add a versioned, opt-in browser-to-Unreal avatar frame protocol and sender.
 - [x] Add UE5 receiver plugin source with protocol-v1 validation, Game Thread dispatch, and neutral timeout/disconnect fallback.
-- [ ] Build the receiver in the target UE5 version and validate it in a real Unreal project.
-- [ ] Implement Animation Blueprint and Control Rig/MetaHuman mapping for the selected character.
+- [x] Add a data-driven MetaHuman rig adapter with per-character Morph Target mapping, smoothing, and Blueprint animation-state output.
+- [ ] Build the receiver and rig adapter in the target UE5 version and validate against the selected MetaHuman.
+- [ ] Implement and verify the target project's Animation Blueprint / Control Rig graph and rig-specific channel mapping.
 - [ ] Validate end-to-end audio, viseme, facial, and body animation timing in a real UE5 project.
 - [ ] Lip-sync from speech timing/visemes for a rigged avatar.
 
