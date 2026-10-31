@@ -1,0 +1,25 @@
+{
+  "type": "cortana.avatar.frame",
+  "version": 1,
+  "sequence": 1,
+  "timestampMs": 1234.5,
+  "state": "speaking",
+  "emotion": "joy",
+  "viseme": "wide",
+  "audioLevel": 0.72,
+  "blendshapes": {
+    "browInnerUp": 0.1,
+    "browDown": 0,
+    "eyeWide": 0.2,
+    "eyeSquint": 0,
+    "cheekRaise": 0.4,
+    "jawOpen": 0.65,
+    "mouthSmile": 0.8,
+    "mouthFrown": 0,
+    "mouthPucker": 0,
+    "mouthWide": 0.5,
+    "lipPress": 0,
+    "upperLipRaise": 0.1,
+    "lowerLipDepress": 0
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "Cortana Avatar Receiver",
+  "Description": "Validated WebSocket receiver for the Cortana avatar frame protocol v1.",
+  "Category": "Animation",
+  "CreatedBy": "CORTANA-Agent",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "Modules": [
+    {
+      "Name": "CortanaAvatarReceiver",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

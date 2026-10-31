@@ -1,51 +1,53 @@
-# Stage 12 — Unreal Engine 5 holographic bridge
+# Stage 12.1 — Unreal Engine 5 receiver
 
-## Goal
+## Scope
 
-Provide a versioned bridge from the browser avatar runtime to an Unreal Engine 5 receiver. This stage implements the wire contract and browser sender; it does not claim that an Unreal project, MetaHuman asset, Control Rig, or packaged hologram already exists.
+This stage adds the source of a UE5 Runtime plugin that receives the Stage 12 browser sender's WebSocket protocol v1. It is a receiver foundation, not a finished holographic character integration. The repository does not currently contain a target Unreal project, a MetaHuman asset, an Animation Blueprint, or a verified Control Rig mapping.
 
-## Data flow
+## Plugin layout
 
-`Emotion Core / viseme timeline → Facial Intelligence → CortanaUnrealBridge → WebSocket → Unreal receiver → Animation Blueprint / Control Rig`
+Enable Plugins/CortanaAvatarReceiver/CortanaAvatarReceiver.uplugin in the target UE5 project. The plugin depends on the engine WebSockets and Json modules and exposes UCortanaAvatarReceiverComponent to Blueprints.
 
-The browser remains functional when disconnected. The bridge is opt-in and never connects automatically.
+Add the component to an Actor, then call ConnectToEndpoint explicitly with the receiver URL. Bind to OnFrameReceived to consume FCortanaAvatarFrame. The frame exposes state, emotion, viseme, audio level, sequence, sender timestamp, and a map of the 13 facial channels.
 
-## Browser sender
+Example Blueprint flow:
 
-```js
-const bridge = window.CortanaUnrealBridge.createUnrealBridge();
-bridge.connect("wss://your-host.example/avatar");
-```
+1. Begin Play (or an explicit user-controlled presentation action).
+2. Call ConnectToEndpoint with the local or secured WebSocket endpoint.
+3. Bind OnFrameReceived and update the character's animation parameters.
+4. On End Play, call DisconnectFromEndpoint.
 
-For local development only, `ws://localhost` and loopback addresses are allowed. Remote endpoints must use `wss://`. Assign the connected instance to `window.CortanaUnrealBridgeRuntime` so the avatar renderer can publish frames: `window.CortanaUnrealBridgeRuntime = bridge`. Call `publish({ state, emotion, viseme, audioLevel, facial, timestampMs })` with the current avatar frame when publishing manually. The sender defaults to ~30 Hz, clamps numeric channels to [0, 1], allowlists state/emotion/viseme labels, adds a monotonically increasing sequence, and exposes dropped-frame counters. Call `disconnect()` when the presentation session ends.
+No connection is initiated automatically by the plugin.
 
-The avatar runtime publishes frames only after an application explicitly creates and connects a bridge. No microphone samples, transcript, prompt, credentials, or conversation history are sent.
+## Receiver validation
 
-## Wire contract v1
+The receiver rejects:
+- messages that are empty, malformed JSON, or larger than 16 KiB;
+- an unexpected message type or protocol version other than 1;
+- missing/non-finite/negative timestamps and invalid sequence values;
+- unknown state, emotion, or viseme labels;
+- audio or blendshape values outside [0, 1];
+- frames whose sequence is not greater than the last accepted sequence.
 
-Each WebSocket text message is one JSON object containing:
-- `type`: `cortana.avatar.frame`
-- `version`: integer `1`
-- `sequence`: increasing integer per connection
-- `timestampMs`: sender monotonic-clock milliseconds, not synchronized wall-clock time
-- `state`: `idle | listening | thinking | speaking`
-- `emotion`: `calm | joy | sadness | anger | fear | surprise | disgust | determination`
-- `viseme`: `neutral | open | mid | wide | round | closed | teeth`
-- `audioLevel`: normalized output activity [0, 1]
-- `blendshapes`: 13 normalized Stage 11 channels
+The message is parsed and validated in the WebSocket callback. A validated frame is then queued to the Game Thread before updating the component and broadcasting the Blueprint event. The component returns its current frame to neutral after the configurable frame timeout (default 0.5 seconds) or a socket close.
 
-The receiver must reject unknown versions, malformed/oversized messages, non-increasing sequences, stale frames, and out-of-range values. It should interpolate accepted frames and return to neutral on timeout/disconnect. Authentication, origin allowlisting, TLS termination, rate limiting, and deployment authorization are mandatory before exposing a receiver beyond localhost.
+The sender's timestampMs is a sender-local monotonic clock, not synchronized with Unreal's clock. The receiver therefore uses local arrival time for timeout handling and does not compare sender timestamps to local wall-clock time.
 
-## Unreal receiver mapping
+## Transport and deployment
 
-Implement a UE5 plugin or project module with a single, documented WebSocket topology. Parse messages off the game thread, validate them, then enqueue the latest accepted frame for game-thread application. Map the 13 channels to the selected character's Morph Targets or Control Rig controls. Blend expression and viseme channels in an Animation Blueprint; keep body gestures as a separate layer. MetaHuman control names must be mapped against the actual selected MetaHuman rig/version, not assumed to match generic blendshape names.
+The component allows wss:// for remote hosts and ws:// only for localhost/loopback development. This is transport policy, not authentication. The current plugin does not implement user authentication, origin allowlisting, authorization, or server-side rate limiting. Keep the receiver bound to localhost or a trusted development network until those controls are implemented by the host application/deployment.
 
-## Acceptance criteria
+## Rig integration still required
 
-- Browser bridge unit tests pass on Windows and Linux CI.
-- No connection is made unless a caller explicitly invokes `connect`.
-- Remote insecure WebSocket URLs are rejected.
-- Frames are bounded, versioned, sequenced, and rate-limited.
-- Disconnect or missing receiver does not break the browser avatar.
-- UE receiver validates frames and neutralizes the face after timeout.
-- A real UE5 project build and rig mapping are required before claiming end-to-end integration.
+The plugin does not assume that generic channel names match MetaHuman control names. In the target project:
+- map the 13 normalized channels to the selected character's Morph Targets or Control Rig controls;
+- combine viseme and expression contributions in an Animation Blueprint with explicit per-channel priorities/limits;
+- keep body gestures as a separate animation layer;
+- add interpolation/smoothing at the rig layer if needed;
+- verify neutral pose, timeout behavior, reconnect behavior, and frame latency on the actual rig.
+
+No MetaHuman-specific mapping is included because the target MetaHuman version and rig are not part of this repository.
+
+## Verification status
+
+The source and plugin descriptor have been added to the repository. A UE5 build has not been claimed: the repository does not include a UE project, and this environment has not run UnrealBuildTool. The next acceptance gate is to enable the plugin in the target UE5 project, compile it against the exact engine version, and run a local sender/receiver test with a real character rig.

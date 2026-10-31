@@ -48,7 +48,9 @@ Status is updated only when implementation and tests have been verified.
 - [ ] Temporal Emotion Core integration after archive and licensing review.
 - [ ] Native desktop shell or Unreal Engine presentation.
 - [x] Add a versioned, opt-in browser-to-Unreal avatar frame protocol and sender.
-- [ ] Implement and build the Unreal Engine 5 receiver, Animation Blueprint, and Control Rig/MetaHuman mapping.
+- [x] Add UE5 receiver plugin source with protocol-v1 validation, Game Thread dispatch, and neutral timeout/disconnect fallback.
+- [ ] Build the receiver in the target UE5 version and validate it in a real Unreal project.
+- [ ] Implement Animation Blueprint and Control Rig/MetaHuman mapping for the selected character.
 - [ ] Validate end-to-end audio, viseme, facial, and body animation timing in a real UE5 project.
 - [ ] Lip-sync from speech timing/visemes for a rigged avatar.
 
