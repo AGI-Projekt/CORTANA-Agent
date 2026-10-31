@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "character": "REPLACE_WITH_TARGET_METAHUMAN_NAME",
+  "engineVersion": "REPLACE_WITH_UE_VERSION",
+  "mappings": [
+    {
+      "sourceChannel": "browInnerUp",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "browDown",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "eyeWide",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "eyeSquint",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "cheekRaise",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "jawOpen",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "mouthSmile",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "mouthFrown",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "mouthPucker",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "mouthWide",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "lipPress",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "upperLipRaise",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    },
+    {
+      "sourceChannel": "lowerLipDepress",
+      "morphTargetName": "",
+      "enabled": true,
+      "scale": 1,
+      "bias": 0,
+      "attackSpeed": 18,
+      "releaseSpeed": 12
+    }
+  ]
+}
