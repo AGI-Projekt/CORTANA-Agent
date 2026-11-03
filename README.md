@@ -26,38 +26,28 @@ Requires Python 3.12 or newer.
 
 Offline text UI:
 
-```bash
-python -m pip install -e ".[test,web]"
-```
+    python -m pip install -e ".[test,web]"
 
 Set offline mode and start the browser interface:
 
-```bash
-# Linux/macOS
-export CORTANA_OFFLINE=1
-python -m cortana.web
-```
+    export CORTANA_OFFLINE=1
+    python -m cortana.web
 
 Open http://127.0.0.1:8000. Offline text mode does not use the live voice connection.
 
 For real model responses, uploaded transcription, and live WebRTC voice:
 
-```bash
-python -m pip install -e ".[llm,web]"
-# Linux/macOS
-unset CORTANA_OFFLINE
-export OPENAI_API_KEY="your-key-from-the-provider"
-python -m cortana.web
-```
+    python -m pip install -e ".[llm,web]"
+    unset CORTANA_OFFLINE
+    export OPENAI_API_KEY="your-key-from-the-provider"
+    python -m cortana.web
 
 Windows PowerShell:
 
-```powershell
-python -m pip install -e ".[llm,web]"
-Remove-Item Env:CORTANA_OFFLINE -ErrorAction SilentlyContinue
-$env:OPENAI_API_KEY = "your-key-from-the-provider"
-python -m cortana.web
-```
+    python -m pip install -e ".[llm,web]"
+    Remove-Item Env:CORTANA_OFFLINE -ErrorAction SilentlyContinue
+    $env:OPENAI_API_KEY = "your-key-from-the-provider"
+    python -m cortana.web
 
 Never commit API keys or put them in the browser. The live voice endpoint returns only a short-lived Realtime client secret; the standard API key remains server-side. The server binds to 127.0.0.1 by default. Microphone permission requires localhost or HTTPS. Voice choice is per session and must be selected before connecting.
 
@@ -71,22 +61,13 @@ Never commit API keys or put them in the browser. The live voice endpoint return
 
 See docs/VOICE_AVATAR.md, docs/LLM_PROVIDER.md, docs/EMOTION_CORE_INTEGRATION.md, docs/LILITH_EMOTION_VISUALS.md, docs/EMOTION_TO_ANIMATION_ENGINE_V1_1.md, docs/EMOTION_CORE_V1_2_FULL_BODY_VOICE_SYNC.md, docs/EMOTION_CORE_V1_3_GESTURE_SEQUENCER.md, docs/EMOTION_CORE_V1_4_AUDIO_ALIGNED_LIPSYNC.md, docs/EMOTION_CORE_V1_5_REALTIME_VISEME_PROVIDER.md, docs/EMOTION_CORE_V1_6_PREDICTIVE_LIPSYNC.md, docs/EMOTION_CORE_V1_7_PHONEME_ALIGNMENT_NEURAL_VISEME.md, docs/EMOTION_CORE_V1_8_CONTEXT_AWARE_MULTIMODAL_PROSODY_SYNC.md, and docs/SELF_IMPROVEMENT.md.
 
+## CORTANA FREE WILL CORE ∞
 
-## Viseme timing API
+A separable governed-autonomy package is available at packages/cortana-free-will-core.
+Install it independently with:
 
-The browser includes an experimental timestamp-based viseme timeline API for future audio-aligned sources. The current transcript-driven path remains approximate; the project does not yet claim phoneme-accurate lip sync. The CI pipeline runs deterministic Node.js tests for timeline timing, validation, cancellation, and reset behavior.
+    python -m pip install -e "packages/cortana-free-will-core[test]"
 
-
-## Audio-synchronized viseme clock
-
-audio-clock.js bridges AudioContext.getOutputTimestamp() with the monotonic clock used by the viseme timeline and falls back explicitly when unsupported. It exposes the playout anchor for a future source of audio-aligned viseme timestamps. The current Realtime transcript-driven mouth shapes remain approximate; no phoneme alignment is inferred from transcript timing alone.
-
-
-## Lip-sync calibration
-
-The browser exposes `window.CortanaLipSyncCalibration` for robust median offset estimation from at least three paired AudioContext/performance timestamp samples. The calibrated offset is applied to provider-supplied timestamped viseme schedules and is clamped to ±250 ms. This calibrates clock/latency offset only; it does not infer phoneme boundaries. The response-scoped viseme provider validates response IDs and event payloads before scheduling.
-
-
-## Predictive lip-sync
-
-`window.CortanaPredictiveLipSync` observes actual timer lateness from scheduled viseme boundaries, estimates latency and jitter with a bounded EWMA, and applies a capped correction to future audio-aligned playback anchors. Its lookahead is adaptive and bounded to 20–120 ms. Prediction operates only over supplied viseme events; it does not infer phonemes from transcript text or raw audio.
+The CEM adapter boundary is src/cortana/free_will_bridge.py. See
+docs/FREE_WILL_CORE_INTEGRATION.md. The module proposes and authorizes decisions;
+it does not execute tools, change safety policies, or grant itself permissions.
