@@ -1,6 +1,6 @@
 """Governed runtime. Approval authorizes one proposal; this runtime never executes it."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 
 from .audit import InMemoryAuditLedger
@@ -85,6 +85,12 @@ class DecisionRuntime:
             expires_at=now + timedelta(seconds=self.policy.approval_ttl_seconds),
         )
         self._approvals[decision_id] = grant
+        self._decisions[decision_id] = replace(
+            decision,
+            status=DecisionStatus.APPROVED,
+            approval_required=False,
+            reason=f"Approved by {approver_id}; execution remains a separate operation.",
+        )
         self.audit.append(
             "decision.approved",
             {
