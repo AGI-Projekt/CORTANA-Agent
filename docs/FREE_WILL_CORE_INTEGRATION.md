@@ -52,3 +52,26 @@ The package includes unit tests for deterministic ranking, governance denial,
 exact-action approval, emotion/permission separation, and audit integrity.
 Tests have not been executed by this GitHub write operation. CI must run them
 before merge or release.
+
+
+## CortanaAgent integration
+
+After installing the package, inject the bridge explicitly:
+
+    from cortana.core import CortanaAgent
+    from cortana.free_will_bridge import CEMContextEnvelope, CEMFreeWillBridge
+
+    agent = CortanaAgent(free_will_bridge=CEMFreeWillBridge())
+    envelope = CEMContextEnvelope(
+        context_id="ctx-001",
+        identity_id="cortana-primary",
+        session_id="session-001",
+        cem_version="6.2.0",
+        autonomy_level="A3",
+    )
+    decision = agent.propose_autonomous_decision(envelope, goal, options)
+
+This is an explicit proposal API; ordinary chat responses do not trigger autonomous
+actions. The selected action must be separately authorized and executed by a
+reviewed adapter. A missing bridge raises a configuration error instead of
+silently bypassing governance.
