@@ -22,7 +22,8 @@ web = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "python-multipart>=0.0.9"]
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "packages/cortana-free-will-core/tests"]
+pythonpath = ["packages/cortana-free-will-core/src"]
 addopts = "-ra"
 
 [tool.ruff]
