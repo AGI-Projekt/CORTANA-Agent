@@ -1,0 +1,25 @@
+[system]
+name = "CORTANA_FREE_WILL_CORE"
+version = "1.0.0"
+mode = "hybrid"
+
+[autonomy]
+default_level = "A3"
+max_level = "A3"
+independent_reasoning = true
+goal_proposals = true
+initiative_proposals = true
+self_reflection = true
+
+[governance]
+allow_local_writes = false
+require_approval_for_external_writes = true
+require_approval_for_high_risk = true
+high_risk_threshold = 0.65
+approval_ttl_seconds = 600
+deny_privileged_operations = true
+deny_safety_policy_changes = true
+
+[audit]
+required = true
+storage = "in_memory_reference_only"

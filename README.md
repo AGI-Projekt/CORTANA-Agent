@@ -90,3 +90,15 @@ The browser exposes `window.CortanaLipSyncCalibration` for robust median offset 
 ## Predictive lip-sync
 
 `window.CortanaPredictiveLipSync` observes actual timer lateness from scheduled viseme boundaries, estimates latency and jitter with a bounded EWMA, and applies a capped correction to future audio-aligned playback anchors. Its lookahead is adaptive and bounded to 20–120 ms. Prediction operates only over supplied viseme events; it does not infer phonemes from transcript text or raw audio.
+
+
+## CORTANA FREE WILL CORE ∞
+
+A separable governed-autonomy package is available at packages/cortana-free-will-core.
+Install it independently with:
+
+    python -m pip install -e "packages/cortana-free-will-core[test]"
+
+The CEM adapter boundary is src/cortana/free_will_bridge.py. See
+docs/FREE_WILL_CORE_INTEGRATION.md. The module proposes and authorizes decisions;
+it does not execute tools, change safety policies, or grant itself permissions.

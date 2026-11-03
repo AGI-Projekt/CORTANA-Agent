@@ -1,13 +1,18 @@
-"""Cortana orchestration with bounded session memory and optional emotion tone hints."""
+"""Cortana orchestration with bounded session memory and optional autonomy bridge."""
 from __future__ import annotations
 from collections import OrderedDict
 from datetime import datetime, timezone
-from typing import Protocol, Sequence
+from typing import TYPE_CHECKING, Protocol, Sequence
 from cortana.emotion.contracts import (
     EmotionCategory, EmotionEstimate, EmotionModality, EmotionProvider, EmotionRequest,
 )
 from cortana.memory import ConversationMemory, MemoryPolicy
 from .contracts import AgentRequest, AgentResponse, Message
+
+if TYPE_CHECKING:
+    from cortana.free_will_bridge import CEMContextEnvelope, CEMFreeWillBridge
+    from cortana_free_will import DecisionOption, DecisionRecord, Goal
+
 
 class LanguageModel(Protocol):
     def generate(
@@ -15,6 +20,7 @@ class LanguageModel(Protocol):
         history: Sequence[Message] = (),
     ) -> str:
         """Generate text from the current user turn and explicit conversation history."""
+
 
 class EchoModel:
     """Safe offline demo model. It does not call a remote provider."""
@@ -24,6 +30,7 @@ class EchoModel:
     ) -> str:
         del instructions, history
         return f"Rozumiem: {prompt}"
+
 
 _BASE_INSTRUCTIONS = (
     "Jesteś Cortaną, pomocnym agentem konwersacyjnym projektu Lilith Cortana Nebiru. "
@@ -48,12 +55,19 @@ _TONE_GUIDANCE: dict[EmotionCategory, str] = {
     EmotionCategory.GRATITUDE: "Odpowiedz ciepło i naturalnie, bez przesadnej poufałości.",
 }
 
+
 class CortanaAgent:
-    """Agent with per-session volatile history and optional injected Emotion Core."""
+    """Agent with bounded session memory and optional injected autonomy bridge."""
+
     def __init__(
-        self, model: LanguageModel | None = None,
-        emotion_provider: EmotionProvider | None = None, *,
-        max_sessions: int = 64, max_history_messages: int = 20, retention_days: int = 1,
+        self,
+        model: LanguageModel | None = None,
+        emotion_provider: EmotionProvider | None = None,
+        *,
+        free_will_bridge: CEMFreeWillBridge | None = None,
+        max_sessions: int = 64,
+        max_history_messages: int = 20,
+        retention_days: int = 1,
     ) -> None:
         if max_sessions < 1:
             raise ValueError("max_sessions must be >= 1")
@@ -61,11 +75,23 @@ class CortanaAgent:
             raise ValueError("max_history_messages must be >= 1")
         self._model = model or EchoModel()
         self._emotion_provider = emotion_provider
+        self._free_will_bridge = free_will_bridge
         self._max_sessions = max_sessions
         self._memory_policy = MemoryPolicy(
             max_messages=max_history_messages, retention_days=retention_days,
         )
         self._sessions: OrderedDict[str, ConversationMemory] = OrderedDict()
+
+    def propose_autonomous_decision(
+        self,
+        envelope: CEMContextEnvelope,
+        goal: Goal,
+        options: Sequence[DecisionOption],
+    ) -> DecisionRecord:
+        """Propose a governed decision explicitly; this method never executes actions."""
+        if self._free_will_bridge is None:
+            raise RuntimeError("Free Will Core bridge is not configured.")
+        return self._free_will_bridge.propose(envelope, goal, options)
 
     def respond(self, request: AgentRequest) -> AgentResponse:
         memory = self._memory_for(request.session_id)
