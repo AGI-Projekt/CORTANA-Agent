@@ -17,6 +17,7 @@ class ActionKind(StrEnum):
 class DecisionStatus(StrEnum):
     ALLOWED = "allowed"
     PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
     DENIED = "denied"
 
 
