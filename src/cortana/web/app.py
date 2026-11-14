@@ -19,6 +19,7 @@ from cortana.llm import OpenAIResponsesModel
 from cortana.observability import PrivacyAuditLog
 from cortana.voice import RealtimeSessionProvider
 from cortana.voice.realtime import DEFAULT_INSTRUCTIONS as REALTIME_DEFAULT_INSTRUCTIONS
+from cortana.web.identity_memory import create_identity_router
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -73,6 +74,7 @@ def create_app(
     realtime_provider: Any | None = None,
     emotion_provider: EmotionProvider | None = None,
     audit_log: PrivacyAuditLog | None = None,
+    identity_db_path: str | Path | None = None,
 ) -> FastAPI:
     """Create an app with injectable dependencies for tests; never bind publicly by default."""
     app = FastAPI(title="Cortana Voice Prototype", version="0.3.0",
@@ -84,6 +86,7 @@ def create_app(
     emotion_load_attempted = False
     privacy_audit = audit_log or PrivacyAuditLog()
     app.state.privacy_audit = privacy_audit
+    app.include_router(create_identity_router(identity_db_path))
 
     def get_agent() -> Any:
         nonlocal runtime_agent
