@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+from contextlib import closing
 import hashlib
 import os
 import secrets
@@ -34,6 +35,10 @@ class MemoryCreate(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
 
 
+class MemorySync(BaseModel):
+    records: list[dict[str, str]] = Field(default_factory=list, max_length=200)
+
+
 class IdentityMemoryService:
     """SQLite-backed device identity and user-scoped memory store."""
 
@@ -53,7 +58,7 @@ class IdentityMemoryService:
         return db
 
     def _initialize(self) -> None:
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             db.execute("PRAGMA journal_mode = WAL")
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS devices (
@@ -163,7 +168,7 @@ class IdentityMemoryService:
         if not clean:
             raise HTTPException(status_code=422, detail="Memory text must not be blank.")
         record = {"id": str(uuid4()), "text": clean, "created_at": self._now()}
-        with self._connect() as db, db:
+        with closing(self._connect()) as db, db:
             db.execute(
                 "INSERT INTO memories(id, fingerprint, text, created_at) VALUES(?,?,?,?)",
                 (record["id"], owner, record["text"], record["created_at"]),
@@ -177,6 +182,27 @@ class IdentityMemoryService:
                 (owner,),
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def sync_memories(self, owner: str, records: list[dict[str, str]]) -> list[dict[str, str]]:
+        if len(records) > 200:
+            raise HTTPException(status_code=413, detail="At most 200 memory records may be synced at once.")
+        normalized: list[dict[str, str]] = []
+        for item in records:
+            memory_id = item.get("id", "")
+            text = item.get("text", "").strip()
+            created_at = item.get("created_at", "")
+            if not memory_id or len(memory_id) > 64 or not text or len(text) > 2000:
+                raise HTTPException(status_code=422, detail="Invalid memory record in sync batch.")
+            normalized.append({"id": memory_id, "text": text, "created_at": created_at or self._now()})
+        with closing(self._connect()) as db, db:
+            for item in normalized:
+                db.execute(
+                    """INSERT INTO memories(id, fingerprint, text, created_at) VALUES(?,?,?,?)
+                       ON CONFLICT(id) DO UPDATE SET text=excluded.text, created_at=excluded.created_at
+                       WHERE memories.fingerprint=excluded.fingerprint""",
+                    (item["id"], owner, item["text"], item["created_at"]),
+                )
+        return self.list_memories(owner)
 
     def delete_memory(self, owner: str, memory_id: str) -> bool:
         with self._connect() as db, db:
@@ -233,6 +259,10 @@ def create_identity_router(database_path: str | Path | None = None) -> APIRouter
     @router.post("/memory", status_code=201)
     async def memory_create(payload: MemoryCreate, device: str = Depends(current_device)):
         return {"record": service.add_memory(device, payload.text)}
+
+    @router.post("/memory/sync")
+    async def memory_sync(payload: MemorySync, device: str = Depends(current_device)):
+        return {"records": service.sync_memories(device, payload.records)}
 
     @router.delete("/memory/{memory_id}")
     async def memory_delete(memory_id: str, device: str = Depends(current_device)):
