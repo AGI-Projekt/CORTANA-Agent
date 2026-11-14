@@ -64,3 +64,16 @@ def test_revoked_device_token_is_rejected(tmp_path):
     headers = {"Authorization": f"Bearer {token}"}
     assert client.delete("/api/identity/me", headers=headers).status_code == 200
     assert client.get("/api/memory", headers=headers).status_code == 401
+
+
+def test_memory_sync_is_idempotent_and_device_scoped(tmp_path):
+    client = TestClient(create_app(identity_db_path=tmp_path / "identity.sqlite3"))
+    token_a, token_b = _register(client), _register(client)
+    headers_a = {"Authorization": f"Bearer {token_a}"}
+    headers_b = {"Authorization": f"Bearer {token_b}"}
+    batch = {"records": [{"id": "local-record-001", "text": "saved on Android", "created_at": "2026-11-14T12:00:00+00:00"}]}
+    first = client.post("/api/memory/sync", json=batch, headers=headers_a)
+    second = client.post("/api/memory/sync", json=batch, headers=headers_a)
+    assert first.status_code == 200 and second.status_code == 200
+    assert len(second.json()["records"]) == 1
+    assert client.get("/api/memory", headers=headers_b).json()["records"] == []
