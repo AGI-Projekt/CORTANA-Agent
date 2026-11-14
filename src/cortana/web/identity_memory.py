@@ -92,7 +92,7 @@ class IdentityMemoryService:
 
     def issue_challenge(self, public_key: str, purpose: str) -> dict[str, str]:
         der, _key, fingerprint = self._decode_public_key(public_key)
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             row = db.execute(
                 "SELECT revoked_at FROM devices WHERE fingerprint=?", (fingerprint,)
             ).fetchone()
@@ -124,7 +124,7 @@ class IdentityMemoryService:
             raise HTTPException(status_code=401, detail="Challenge signature is invalid.") from exc
 
         fingerprint = pending["fingerprint"]
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             row = db.execute(
                 "SELECT revoked_at FROM devices WHERE fingerprint=?", (fingerprint,)
             ).fetchone()
@@ -154,7 +154,7 @@ class IdentityMemoryService:
         if not token or len(token) > 256:
             raise HTTPException(status_code=401, detail="Invalid bearer token.")
         digest = hashlib.sha256(token.encode()).hexdigest()
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             row = db.execute(
                 "SELECT fingerprint FROM devices WHERE token_hash=? AND revoked_at IS NULL",
                 (digest,),
@@ -176,7 +176,7 @@ class IdentityMemoryService:
         return record
 
     def list_memories(self, owner: str) -> list[dict[str, str]]:
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             rows = db.execute(
                 "SELECT id, text, created_at FROM memories WHERE fingerprint=? ORDER BY created_at, id",
                 (owner,),
@@ -205,19 +205,19 @@ class IdentityMemoryService:
         return self.list_memories(owner)
 
     def delete_memory(self, owner: str, memory_id: str) -> bool:
-        with self._connect() as db, db:
+        with closing(self._connect()) as db, db:
             cursor = db.execute(
                 "DELETE FROM memories WHERE id=? AND fingerprint=?", (memory_id, owner)
             )
         return cursor.rowcount > 0
 
     def clear_memories(self, owner: str) -> int:
-        with self._connect() as db, db:
+        with closing(self._connect()) as db, db:
             cursor = db.execute("DELETE FROM memories WHERE fingerprint=?", (owner,))
         return cursor.rowcount
 
     def revoke(self, owner: str) -> None:
-        with self._connect() as db, db:
+        with closing(self._connect()) as db, db:
             db.execute(
                 "UPDATE devices SET revoked_at=?, token_hash=? WHERE fingerprint=?",
                 (self._now(), secrets.token_hex(32), owner),
