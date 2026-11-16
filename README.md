@@ -102,3 +102,8 @@ Install it independently with:
 The CEM adapter boundary is src/cortana/free_will_bridge.py. See
 docs/FREE_WILL_CORE_INTEGRATION.md. The module proposes and authorizes decisions;
 it does not execute tools, change safety policies, or grant itself permissions.
+
+
+## Device Identity & Memory Sync 0.7.1
+
+The web extra now includes device-key challenge/response and authenticated, device-scoped memory APIs. See [`docs/IDENTITY_MEMORY_SYNC_0.7.1.md`](docs/IDENTITY_MEMORY_SYNC_0.7.1.md) for API contracts, deployment constraints, and security limitations.
